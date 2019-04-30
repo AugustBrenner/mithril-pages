@@ -1,0 +1,54 @@
+{
+  "name": "mithril",
+  "version": "2.0.0-rc.4",
+  "description": "A framework for building brilliant applications",
+  "author": "Leo Horie",
+  "license": "MIT",
+  "main": "mithril.js",
+  "module": "mithril.mjs",
+  "repository": "MithrilJS/mithril.js",
+  "scripts": {
+    "dev": "node bundler/cli browser.js -output mithril.js -watch",
+    "build": "npm run build-browser & npm run build-min && npm run build-esm",
+    "build-browser": "node bundler/cli browser.js -output mithril.js",
+    "build-min": "node bundler/cli browser.js -output mithril.min.js -minify",
+    "build-esm": "node esm.js",
+    "precommit": "lint-staged",
+    "lintdocs": "node docs/lint",
+    "gendocs": "node docs/generate",
+    "lint": "eslint . || true",
+    "lint:fix": "eslint . --fix",
+    "perf": "node performance/test-perf.js",
+    "test": "node ospec/bin/ospec",
+    "posttest": "npm run lint",
+    "cover": "istanbul cover --print both ospec/bin/ospec",
+    "release": "npm version -m 'v%s'",
+    "preversion": "npm run test",
+    "version": "npm run build && git add mithril.js mithril.min.js mithril.mjs mithril.min.mjs stream/stream.mjs",
+    "postversion": "git push --follow-tags"
+  },
+  "devDependencies": {
+    "@alrra/travis-scripts": "^3.0.1",
+    "benchmark": "^2.1.4",
+    "chokidar": "^2.0.4",
+    "dedent": "^0.7.0",
+    "eslint": "^5.13.0",
+    "gh-pages": "^2.0.1",
+    "istanbul": "^0.4.5",
+    "lint-staged": "^8.1.3",
+    "locater": "^1.3.0",
+    "marked": "^0.6.2",
+    "pinpoint": "^1.1.0",
+    "terser": "^3.16.1"
+  },
+  "bin": {
+    "ospec": "./ospec/bin/ospec"
+  },
+  "lint-staged": {
+    "*.js": [
+      "eslint . --fix",
+      "git add"
+    ]
+  },
+  "dependencies": {}
+}
