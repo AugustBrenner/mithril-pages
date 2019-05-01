@@ -4,6 +4,15 @@ var Home = {
 
 	oninit: function(vnode) {		
 		vnode.state.STATE1 = 'STATE1'
+
+		vnode.state.counter = 1
+
+		vnode.state.increment = function(){
+			vnode.state.counter++
+		}
+	},
+
+	fetch: function(vnode){
 		return new Promise((resolve, reject) => {
 
 			setTimeout(function(){
@@ -18,18 +27,17 @@ var Home = {
 
 			m.redraw()
 		})
-	    	
-
 	},
 
 	oncreate: function(vnode){
-		console.log('init')
-		console.time('timer')
-		m.redraw()
-		console.timeEnd('timer')
+		// console.log('init')
+		// console.time('timer')
+		// m.redraw()
+		// console.timeEnd('timer')
 	},
  
 	view: function(vnode) {
+		// console.log('home', vnode.store)
 		return [
 			m('head', [
 				m.styles,
@@ -38,6 +46,15 @@ var Home = {
 			m('body', [
 				m('a', {href:'/page2', oncreate: m.route.link}, 'Page 2'),
 				m('pre', JSON.stringify(vnode.state.greetings, null, 4)),
+				m('pre', vnode.state.counter),
+				m('div', 'HELLO'),
+				m('div', 'HELLO'),
+				m('div', 'HELLO'),
+				m('button', {
+					onclick: function(){
+						vnode.state.increment()
+					}
+				}, '+1'),
 				// Array.apply(null, {length: 99999}).map(x => {
 				// 	return m('p', 'hello')
 				// }),

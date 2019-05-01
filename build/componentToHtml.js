@@ -24,6 +24,10 @@ const VOID_TAGS = [
 
 const COMPONENT_PROPS = [
   'oninit',
+  //<<<<<<< Modified: Added store to vnode
+  'fetch',
+  //=======
+  //>>>>>>>
   'view',
   'oncreate',
   'onbeforeupdate',
@@ -58,6 +62,17 @@ function camelToDash (str) {
 function removeEmpties (n) {
   return n !== ''
 }
+
+//<<<<<<< Modified: Added hash function
+function hash(str) {
+  var hash = 5381, i = str.length;
+  while(i) {
+    hash = (hash * 33) ^ str.charCodeAt(--i)
+  }
+  return hash >>> 0
+}
+//=======
+//>>>>>>>
 
 function omit (source, keys) {
   keys = keys || []
@@ -98,6 +113,18 @@ async function setHooks (component, vnode, hooks) {
   if (component.oninit) {
     await (component.oninit.call(vnode.state, vnode) || async function () {})
   }
+  //<<<<<<< Modified: Cache state for fetch function
+  if (component.fetch) {
+    var state = JSON.stringify(vnode.state)
+    var func = component.fetch.toString()
+
+    await (component.fetch.call(vnode.state, vnode) || async function () {})
+    
+    var key = hash(state + func)
+    vnode.store[key] = JSON.stringify(vnode.state)
+  }
+  //=======
+  //>>>>>>>
   if (component.onremove) {
     hooks.push(component.onremove.bind(vnode.state, vnode))
   }
@@ -161,18 +188,14 @@ function createAttrString (view, escapeAttributeValue) {
     .join('')
 }
 
-async function createChildrenContent (view, options, hooks, materializedPath) {
+async function createChildrenContent (view, options, hooks) {
   if (view.text != null) {
     return options.escapeString(view.text)
   }
   if (isArray(view.children) && !view.children.length) {
     return ''
   }
-  //<<<<<<< Modified: Added materialized path
-  return _render(view.children, options, hooks, materializedPath)
-  //=======
-  // return _render(view.children, options, hooks)
-  //>>>>>>>
+  return _render(view.children, options, hooks)
 }
 
 async function render (view, attrs, options) {
@@ -195,19 +218,7 @@ async function render (view, attrs, options) {
     if (!options.hasOwnProperty(key)) options[key] = defaultOptions[key]
   })
 
-  //<<<<<<< Modified: Added materialized path and delete empty states
-  if(!options.store) options.store = {}
-  if(!options.store._states) options.store._states = {}
-
-  const result = await _render(view, options, hooks, options.path)
-
-  const states = options.store._states
-  Object.keys(states).forEach(function(key){
-    if(Object.keys(states[key]).length === 0) delete states[key]
-  })
-  //=======
-  // const result = await _render(view, options, hooks)
-  //>>>>>>>
+  const result = await _render(view, options, hooks)
 
   hooks.forEach(function (hook) {
     hook()
@@ -216,11 +227,8 @@ async function render (view, attrs, options) {
   return result
 }
 
-//<<<<<<< Modified: Added materialized path
-async function _render (view, options, hooks, materializedPath) {
-//=======
-// async function _render (view, options, hooks) {
-//>>>>>>>
+async function _render (view, options, hooks) {
+
   const type = typeof view
 
   if (type === 'string') {
@@ -237,15 +245,9 @@ async function _render (view, options, hooks, materializedPath) {
 
   if (isArray(view)) {
     let result = ''
-    //<<<<<<< Modified: Added materialized path
-    for (var i = 0; i < view.length; i++) {
-      const v = view[i]
-      const path = view.key ? view.key : i
-    //=======
-      result += await _render(v, options, hooks, materializedPath + '/' + path)
-    // for (const v of view) {
-    //   result += await _render(v, options, hooks)
-    //>>>>>>>
+
+    for (const v of view) {
+      result += await _render(v, options, hooks)
     }
     return result
   }
@@ -271,25 +273,19 @@ async function _render (view, options, hooks, materializedPath) {
       vnode.state = omit(component, COMPONENT_PROPS)
       //<<<<<<< Modified: Added global store
       vnode.store = options.store
-      vnode.store._states[materializedPath] = vnode.state
-
       //=======
       //>>>>>>>
       vnode.attrs = component.attrs || view.attrs || {}
 
       await setHooks(component, vnode, hooks)
-      //<<<<<<< Modified: Added materialized path
-      return _render(component.view.call(vnode.state, vnode), options, hooks, materializedPath)
-      //=======
-      // return _render(component.view.call(vnode.state, vnode), options, hooks)
-      //>>>>>>>
+      return _render(component.view.call(vnode.state, vnode), options, hooks)
     }
   }
 
   if (view.tag === '<') {
     return '' + view.children
   }
-  const children = await createChildrenContent(view, options, hooks, materializedPath)
+  const children = await createChildrenContent(view, options, hooks)
   if (view.tag === '#') {
     return options.escapeString(children)
   }

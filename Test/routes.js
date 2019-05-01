@@ -21,7 +21,7 @@ var Page2 = {
 	},
 		
 	view: function(vnode) {
-		// console.log('page', vnode.store)
+		console.log('page', vnode.store)
 		return [
 			m('head', [
 				m('title', 'Page 2'),

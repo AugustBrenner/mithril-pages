@@ -70,7 +70,6 @@ const render = args => (req, res) => {
 				return elem.outerHTML
 			})
 		)
-		window.__mithril_pages_store__ = ${store}
 	</script>`
 
 
@@ -79,9 +78,11 @@ const render = args => (req, res) => {
 
 	componentToHtml(component.component, component.params, {store: store, path: req.url}).then(view => {
 
+		scripts = `<script>window.__mithril_pages_store__ = ${JSON.stringify(store)}</script>` + scripts
+
 		view = view.replace(/__mithril_pages_styles__/, `<style class="__mithril_pages_styles__">${styles}</style>`)
 		view = view.replace(/__mithril_pages_scripts__/, scripts)
-		view = view.replace(/__mithril_pages_store__/, JSON.stringify(store))
+		// view = view.replace(/__mithril_pages_store__/, JSON.stringify(store))
 
 		res.send(view)
 	})

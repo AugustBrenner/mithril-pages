@@ -22,12 +22,20 @@ module.exports = function($window) {
 		if (vnode.state !== original) throw new Error("`vnode.state` must not be modified")
 	}
 	
-	//<<<<<<< Modified: Added store to vnode
+	//<<<<<<< Modified: Added setStore and hash functions
 	function setStore(children, store){
 		for(var i = 0; i < children.length; i++){
 			if(!children[i]) continue
 			children[i].store = store
 		}
+	}
+
+	function hash(str) {
+		var hash = 5381, i = str.length;
+		while(i) {
+			hash = (hash * 33) ^ str.charCodeAt(--i)
+		}
+		return hash >>> 0
 	}
 	//=======
 	//>>>>>>>
@@ -805,7 +813,11 @@ module.exports = function($window) {
 		return attr === "value" || attr === "checked" || attr === "selectedIndex" || attr === "selected" && vnode.dom === activeElement() || vnode.tag === "option" && vnode.dom.parentNode === $doc.activeElement
 	}
 	function isLifecycleMethod(attr) {
-		return attr === "oninit" || attr === "oncreate" || attr === "onupdate" || attr === "onremove" || attr === "onbeforeremove" || attr === "onbeforeupdate"
+		//<<<<<<< Modified: Added store to vnode
+		return attr === "oninit" || attr === "fetch" || attr === "oncreate" || attr === "onupdate" || attr === "onremove" || attr === "onbeforeremove" || attr === "onbeforeupdate"
+		//=======
+		// return attr === "oninit" || attr === "oncreate" || attr === "onupdate" || attr === "onremove" || attr === "onbeforeremove" || attr === "onbeforeupdate"
+		//>>>>>>>
 	}
 	function hasPropertyKey(vnode, key, ns) {
 		// Filter out namespaced keys
@@ -908,6 +920,41 @@ module.exports = function($window) {
 	//lifecycle
 	function initLifecycle(source, vnode, hooks) {
 		if (typeof source.oninit === "function") callHook.call(source.oninit, vnode)
+
+		//<<<<<<< Modified: Cache state for fetch function
+		if (typeof source.fetch === "function"){
+
+			var state = JSON.stringify(vnode.state)
+		    var func = source.fetch.toString()
+		    var key = hash(state + func)
+		    var cache = vnode.store[key]
+
+		    if(cache){
+		    	if(typeof cache === 'string'){
+		    		try{
+		    			cache = JSON.parse(cache)
+		    		}
+		    		catch(e){
+		    			cache = {}
+		    		}
+		    	}
+		    	else{
+		    		try{
+		    			cache = JSON.parse(JSON.stringify(cache))
+		    		}
+		    		catch(e){
+		    			cache = {}
+		    		}
+		    	}
+	    		Object.assign(vnode.state, cache)
+	    		vnode.store[key] = vnode.state
+		    } else{
+		    	vnode.store[key] = vnode.state
+		    	callHook.call(source.fetch, vnode)
+		    }
+		}
+		//=======
+		//>>>>>>>
 		if (typeof source.oncreate === "function") hooks.push(callHook.bind(source.oncreate, vnode))
 	}
 	function updateLifecycle(source, vnode, hooks) {
