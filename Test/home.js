@@ -3,10 +3,11 @@ const m 		= require('mithril-pages')
 var Home = {
 
 	oninit: function(vnode) {		
-
+		vnode.state.STATE1 = 'STATE1'
 		return new Promise((resolve, reject) => {
 
 			setTimeout(function(){
+				vnode.state.STATE2 = 'STATE2'
 				resolve()
 			}, 400)
 			

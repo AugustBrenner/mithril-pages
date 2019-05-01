@@ -16,6 +16,8 @@ module.exports = function($window, redrawService) {
 	var render, component, attrs, currentPath, lastUpdate
 	//<<<<<<< Modified: Added store to route parameters
 	var route = function(root, defaultRoute, routes, store) {
+		if(!store) store = {}
+		if(typeof store !== "object") throw new Error("Ensure the store argument is type 'object'.")
 	//=======
 	// var route = function(root, defaultRoute, routes) {
 	//>>>>>>>

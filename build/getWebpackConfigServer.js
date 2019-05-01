@@ -6,8 +6,7 @@ module.exports = function(pathname, dirname, production){
 	
 	return {
 		mode: production ? 'production' : 'development',
-		// entry: path.resolve(__dirname, './bundle-bridge.js'),
-		entry: path.resolve(__dirname, './bundle-bridge-server.js'),
+		entry: pathname,
 		output: {
 			path: pathname,
 	        filename: 'bundle_server.js',
@@ -27,28 +26,6 @@ module.exports = function(pathname, dirname, production){
 				'mithril-pages': path.resolve(__dirname, '../server/index.js')
 			}
 		},
-		module: {
-			rules: [
-		        { 
-		            include: [
-          				path.resolve(__dirname, 'bundle-bridge-server.js')
-          			],
-		            loader: StringReplacePlugin.replace({
-		                replacements: [
-		                    {
-		                        pattern: /PLACEHOLDER_FOR_ENTRY/g,
-		                        replacement: function (match, p1, offset, string) {
-		                            return pathname
-		                        }
-		                    }
-		                ]
-		            })
-		        }
-			]
-		},
-	   	plugins: [
-	   		new StringReplacePlugin(),
-		],
 	    devtool: 'sourcemap',
 	}
 

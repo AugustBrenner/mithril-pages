@@ -64,7 +64,11 @@ function omit (source, keys) {
   const res = Object.assign(Object.create(Object.getPrototypeOf(source)), source)
   keys.forEach(function (key) {
     if (key in res) {
-      res[key] = null
+      //<<<<<<< Modified: Added store to vnode
+      delete res[key]
+      //=======
+      // res[key] = null
+      //>>>>>>>
     }
   })
   return res
@@ -157,14 +161,18 @@ function createAttrString (view, escapeAttributeValue) {
     .join('')
 }
 
-async function createChildrenContent (view, options, hooks) {
+async function createChildrenContent (view, options, hooks, materializedPath) {
   if (view.text != null) {
     return options.escapeString(view.text)
   }
   if (isArray(view.children) && !view.children.length) {
     return ''
   }
-  return _render(view.children, options, hooks)
+  //<<<<<<< Modified: Added materialized path
+  return _render(view.children, options, hooks, materializedPath)
+  //=======
+  // return _render(view.children, options, hooks)
+  //>>>>>>>
 }
 
 async function render (view, attrs, options) {
@@ -187,7 +195,19 @@ async function render (view, attrs, options) {
     if (!options.hasOwnProperty(key)) options[key] = defaultOptions[key]
   })
 
-  const result = await _render(view, options, hooks)
+  //<<<<<<< Modified: Added materialized path and delete empty states
+  if(!options.store) options.store = {}
+  if(!options.store._states) options.store._states = {}
+
+  const result = await _render(view, options, hooks, options.path)
+
+  const states = options.store._states
+  Object.keys(states).forEach(function(key){
+    if(Object.keys(states[key]).length === 0) delete states[key]
+  })
+  //=======
+  // const result = await _render(view, options, hooks)
+  //>>>>>>>
 
   hooks.forEach(function (hook) {
     hook()
@@ -196,7 +216,11 @@ async function render (view, attrs, options) {
   return result
 }
 
-async function _render (view, options, hooks) {
+//<<<<<<< Modified: Added materialized path
+async function _render (view, options, hooks, materializedPath) {
+//=======
+// async function _render (view, options, hooks) {
+//>>>>>>>
   const type = typeof view
 
   if (type === 'string') {
@@ -213,8 +237,15 @@ async function _render (view, options, hooks) {
 
   if (isArray(view)) {
     let result = ''
-    for (const v of view) {
-      result += await _render(v, options, hooks)
+    //<<<<<<< Modified: Added materialized path
+    for (var i = 0; i < view.length; i++) {
+      const v = view[i]
+      const path = view.key ? view.key : i
+    //=======
+      result += await _render(v, options, hooks, materializedPath + '/' + path)
+    // for (const v of view) {
+    //   result += await _render(v, options, hooks)
+    //>>>>>>>
     }
     return result
   }
@@ -238,17 +269,27 @@ async function _render (view, options, hooks) {
     if (component) {
       vnode.tag = copy(component)
       vnode.state = omit(component, COMPONENT_PROPS)
+      //<<<<<<< Modified: Added global store
+      vnode.store = options.store
+      vnode.store._states[materializedPath] = vnode.state
+
+      //=======
+      //>>>>>>>
       vnode.attrs = component.attrs || view.attrs || {}
 
       await setHooks(component, vnode, hooks)
-      return _render(component.view.call(vnode.state, vnode), options, hooks)
+      //<<<<<<< Modified: Added materialized path
+      return _render(component.view.call(vnode.state, vnode), options, hooks, materializedPath)
+      //=======
+      // return _render(component.view.call(vnode.state, vnode), options, hooks)
+      //>>>>>>>
     }
   }
 
   if (view.tag === '<') {
     return '' + view.children
   }
-  const children = await createChildrenContent(view, options, hooks)
+  const children = await createChildrenContent(view, options, hooks, materializedPath)
   if (view.tag === '#') {
     return options.escapeString(children)
   }

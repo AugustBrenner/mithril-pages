@@ -86,9 +86,8 @@ function hyperscript(selector) {
 	if (selector == null || typeof selector !== "string" && typeof selector !== "function" && typeof selector.view !== "function") {
 		throw Error("The selector must be either a string or a component.");
 	}
-	console.log(arguments)
+
 	var vnode = hyperscriptVnode.apply(1, arguments)
-	console.log(vnode)
 
 	if (typeof selector === "string") {
 		vnode.children = Vnode.normalizeChildren(vnode.children)

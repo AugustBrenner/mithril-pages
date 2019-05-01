@@ -57,6 +57,8 @@ const render = args => (req, res) => {
 		.map((path) => `<script class= "__mithril_pages_scripts__" src="${path}"></script>`)
 		.join('\n')
 
+	const store = {}
+	
 	scripts += `<script>
 		m.scripts = m.trust(
 			document.getElementsByClassName('__mithril_pages_scripts__').map(function(elem){
@@ -68,16 +70,18 @@ const render = args => (req, res) => {
 				return elem.outerHTML
 			})
 		)
+		window.__mithril_pages_store__ = ${store}
 	</script>`
 
 
-	const component = route(req.url, args.app.routes)
+	const component = route(req.url, args.routes)
 
 
-	componentToHtml(component.component, component.params).then(view => {
+	componentToHtml(component.component, component.params, {store: store, path: req.url}).then(view => {
 
 		view = view.replace(/__mithril_pages_styles__/, `<style class="__mithril_pages_styles__">${styles}</style>`)
 		view = view.replace(/__mithril_pages_scripts__/, scripts)
+		view = view.replace(/__mithril_pages_store__/, JSON.stringify(store))
 
 		res.send(view)
 	})
@@ -118,7 +122,7 @@ m.init = function(pathname){
 			.map((path) => fileSystem.readFileSync(outputPath + '/' + path))
 			.join('\n')
 
-		args.app = requireFromString(scripts)
+		args.routes = requireFromString(scripts)
 
 	})
 

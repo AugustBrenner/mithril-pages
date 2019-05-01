@@ -6,7 +6,8 @@ const Home 		= require('./home.js')
 
 
 var component = {
-	view: function(){
+	view: function(vnode){
+		// console.log('component', vnode.store)
 		return m('div', 'Hello!')
 	}
 }
@@ -15,19 +16,21 @@ var component = {
 var Page2 = {
 
 	oninit: function(vnode){
-
+		vnode.store.hello = 'world'
+		vnode.state.STATE = 'STATE1'
 	},
 		
 	view: function(vnode) {
+		// console.log('page', vnode.store)
 		return [
 			m('head', [
 				m('title', 'Page 2'),
 				m.styles,
 			]),
 			m('body', [
-				m('a', {href:'/', oncreate: m.route.link}, 'Home'),
+				m('a', {href:'/', oncreate: m.route.link}, 'Home', 'Away', 'from', m({view: function(vnode){return m('div','HOME')}})),
 				m('svg', m('use', {'xlink:href': '#icon-like'})),
-				m('pre', JSON.stringify(vnode.attrs, null, 4)),
+				m('pre', {key: 'pre'}, JSON.stringify(vnode.attrs, null, 4)),
 				m(component, {HEllo: 'World'}),
 				m.svgs,
 				m.scripts,

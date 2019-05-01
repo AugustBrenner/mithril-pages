@@ -5,6 +5,8 @@ var Vnode = require("../render/vnode")
 module.exports = function(redrawService) {
 	//<<<<<<< Modified: Added store to mount paramters
 	return function(root, component, store) {
+		if(!store) store = {}
+		if(typeof store !== "object") throw new Error("Ensure the store argument is type 'object'.")
 	//=======
 	// return function(root, component) {
 	//>>>>>>>

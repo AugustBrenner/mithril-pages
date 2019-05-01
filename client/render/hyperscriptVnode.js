@@ -48,6 +48,12 @@ module.exports = function() {
 		children = []
 		while (start < arguments.length) children.push(arguments[start++])
 	}
+	
+	//<<<<<<< Modified: Added store to vnode
+	var store = arguments[arguments.length -1]
 
-	return Vnode("", attrs.key, attrs, children)
+	return Vnode("", attrs.key, attrs, store, children)
+	//=======
+	// return Vnode("", attrs.key, attrs, children)
+	//>>>>>>>
 }

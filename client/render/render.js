@@ -21,6 +21,16 @@ module.exports = function($window) {
 	function checkState(vnode, original) {
 		if (vnode.state !== original) throw new Error("`vnode.state` must not be modified")
 	}
+	
+	//<<<<<<< Modified: Added store to vnode
+	function setStore(children, store){
+		for(var i = 0; i < children.length; i++){
+			if(!children[i]) continue
+			children[i].store = store
+		}
+	}
+	//=======
+	//>>>>>>>
 
 	//Note: the hook is passed as the `this` argument to allow proxying the
 	//arguments without requiring a full array allocation to do so. It also
@@ -46,6 +56,7 @@ module.exports = function($window) {
 	}
 	//create
 	function createNodes(parent, vnodes, start, end, hooks, nextSibling, ns) {
+		// console.log('createNodes', vnodes[0] ? vnodes[0].store : 'EMPTY')
 		for (var i = start; i < end; i++) {
 			var vnode = vnodes[i]
 			if (vnode != null) {
@@ -54,6 +65,7 @@ module.exports = function($window) {
 		}
 	}
 	function createNode(parent, vnode, hooks, ns, nextSibling) {
+		// console.log('createNode', vnode.store)
 		var tag = vnode.tag
 		if (typeof tag === "string") {
 			vnode.state = {}
@@ -68,16 +80,18 @@ module.exports = function($window) {
 		else createComponent(parent, vnode, hooks, ns, nextSibling)
 	}
 	function createText(parent, vnode, nextSibling) {
+		// console.log('createText', vnode.store)
 		vnode.dom = $doc.createTextNode(vnode.children)
 		insertNode(parent, vnode.dom, nextSibling)
 	}
 	var possibleParents = {caption: "table", thead: "table", tbody: "table", tfoot: "table", tr: "tbody", th: "tr", td: "tr", colgroup: "table", col: "colgroup"}
 	function createHTML(parent, vnode, ns, nextSibling) {
+		// console.log('createHTML', vnode.store)
 		var match = vnode.children.match(/^\s*?<(\w+)/im) || []
 		// not using the proper parent makes the child element(s) vanish.
 		//     var div = document.createElement("div")
 		//     div.innerHTML = "<td>i</td><td>j</td>"
-		//     console.log(div.innerHTML)
+		    console.log(div.innerHTML)
 		// --> "ij", no <td> in sight.
 		var temp = $doc.createElement(possibleParents[match[1]] || "div")
 		if (ns === "http://www.w3.org/2000/svg") {
@@ -96,9 +110,14 @@ module.exports = function($window) {
 		insertNode(parent, fragment, nextSibling)
 	}
 	function createFragment(parent, vnode, hooks, ns, nextSibling) {
+		// console.log('createFragment', vnode.store)
 		var fragment = $doc.createDocumentFragment()
 		if (vnode.children != null) {
 			var children = vnode.children
+			//<<<<<<< Modified: Added store to vnode
+			setStore(children, vnode.store)
+			//=======
+			//>>>>>>>
 			createNodes(fragment, children, 0, children.length, hooks, null, ns)
 		}
 		vnode.dom = fragment.firstChild
@@ -106,6 +125,7 @@ module.exports = function($window) {
 		insertNode(parent, fragment, nextSibling)
 	}
 	function createElement(parent, vnode, hooks, ns, nextSibling) {
+		// console.log('createElement', vnode.store, vnode)
 		var tag = vnode.tag
 		var attrs = vnode.attrs
 		var is = attrs && attrs.is
@@ -129,16 +149,25 @@ module.exports = function($window) {
 		else {
 			if (vnode.text != null) {
 				if (vnode.text !== "") element.textContent = vnode.text
-				else vnode.children = [Vnode("#", undefined, undefined, vnode.text, undefined, undefined)]
+				//<<<<<<< Modified: Added store to vnode
+				else vnode.children = [Vnode("#", undefined, undefined, vnode.store, vnode.text, undefined, undefined)]
+				//=======
+				// else vnode.children = [Vnode("#", undefined, undefined, vnode.text, undefined, undefined)]
+				//>>>>>>>
 			}
 			if (vnode.children != null) {
 				var children = vnode.children
+				//<<<<<<< Modified: Added store to vnode
+				setStore(children, vnode.store)
+				//=======
+				//>>>>>>>
 				createNodes(element, children, 0, children.length, hooks, null, ns)
 				if (vnode.tag === "select" && attrs != null) setLateSelectAttrs(vnode, attrs)
 			}
 		}
 	}
 	function initComponent(vnode, hooks) {
+		// console.log('initComponent', vnode.store)
 		var sentinel
 		if (typeof vnode.tag.view === "function") {
 			vnode.state = Object.create(vnode.tag)
@@ -154,11 +183,16 @@ module.exports = function($window) {
 		}
 		initLifecycle(vnode.state, vnode, hooks)
 		if (vnode.attrs != null) initLifecycle(vnode.attrs, vnode, hooks)
-		vnode.instance = Vnode.normalize(callHook.call(vnode.state.view, vnode))
+		//<<<<<<< Modified: Added store to vnode
+		vnode.instance = Vnode.normalize(callHook.call(vnode.state.view, vnode), vnode.store)
+		//=======
+		// vnode.instance = Vnode.normalize(callHook.call(vnode.state.view, vnode))
+		//>>>>>>>
 		if (vnode.instance === vnode) throw Error("A view cannot return the vnode it received as argument")
 		sentinel.$$reentrantLock$$ = null
 	}
 	function createComponent(parent, vnode, hooks, ns, nextSibling) {
+		// console.log('createComponent', vnode.store)
 		initComponent(vnode, hooks)
 		if (vnode.instance != null) {
 			createNode(parent, vnode.instance, hooks, ns, nextSibling)
@@ -275,6 +309,7 @@ module.exports = function($window) {
 	// three of the diff algo.
 
 	function updateNodes(parent, old, vnodes, hooks, nextSibling, ns) {
+		// console.log('updateNodes', vnodes[0].store)
 		if (old === vnodes || old == null && vnodes == null) return
 		else if (old == null || old.length === 0) createNodes(parent, vnodes, 0, vnodes.length, hooks, nextSibling, ns)
 		else if (vnodes == null || vnodes.length === 0) removeNodes(old, 0, old.length)
@@ -433,6 +468,7 @@ module.exports = function($window) {
 		}
 	}
 	function updateNode(parent, old, vnode, hooks, nextSibling, ns) {
+		// console.log('updateNode', vnode.store)
 		var oldTag = old.tag, tag = vnode.tag
 		if (oldTag === tag) {
 			vnode.state = old.state
@@ -470,6 +506,7 @@ module.exports = function($window) {
 		else vnode.dom = old.dom, vnode.domSize = old.domSize
 	}
 	function updateFragment(parent, old, vnode, hooks, nextSibling, ns) {
+		// console.log('updateFragment', vnode.store)
 		updateNodes(parent, old.children, vnode.children, hooks, nextSibling, ns)
 		var domSize = 0, children = vnode.children
 		vnode.dom = null
@@ -503,12 +540,18 @@ module.exports = function($window) {
 			if (old.text.toString() !== vnode.text.toString()) old.dom.firstChild.nodeValue = vnode.text
 		}
 		else {
-			if (old.text != null) old.children = [Vnode("#", undefined, undefined, old.text, undefined, old.dom.firstChild)]
-			if (vnode.text != null) vnode.children = [Vnode("#", undefined, undefined, vnode.text, undefined, undefined)]
+			//<<<<<<< Modified: Added store to vnode
+			if (old.text != null) old.children = [Vnode("#", undefined, undefined, undefined, old.text, undefined, old.dom.firstChild)]
+			if (vnode.text != null) vnode.children = [Vnode("#", undefined, undefined, undefined, vnode.text, undefined, undefined)]
+			//=======
+			// if (old.text != null) old.children = [Vnode("#", undefined, undefined, old.text, undefined, old.dom.firstChild)]
+			// if (vnode.text != null) vnode.children = [Vnode("#", undefined, undefined, vnode.text, undefined, undefined)]
+			//>>>>>>>
 			updateNodes(element, old.children, vnode.children, hooks, null, ns)
 		}
 	}
 	function updateComponent(parent, old, vnode, hooks, nextSibling, ns) {
+		// console.log('updateComponent', vnode.store)
 		vnode.instance = Vnode.normalize(callHook.call(vnode.state.view, vnode))
 		if (vnode.instance === vnode) throw Error("A view cannot return the vnode it received as argument")
 		updateLifecycle(vnode.state, vnode, hooks)
@@ -889,6 +932,7 @@ module.exports = function($window) {
 	}
 
 	function render(dom, vnodes) {
+		// console.log('render', vnodes.store)
 		if (!dom) throw new Error("Ensure the DOM element being passed to m.route/m.mount/m.render is not undefined.")
 		var hooks = []
 		var active = activeElement()
@@ -897,7 +941,12 @@ module.exports = function($window) {
 		// First time rendering into a node clears it out
 		if (dom.vnodes == null) dom.textContent = ""
 
-		vnodes = Vnode.normalizeChildren(Array.isArray(vnodes) ? vnodes : [vnodes])
+		//<<<<<<< Modified: Added store to vnode
+		var children = Array.isArray(vnodes) ? vnodes : [vnodes]
+		vnodes = Vnode.normalizeChildren(children, children[0].store)
+		//=======
+		// vnodes = Vnode.normalizeChildren(Array.isArray(vnodes) ? vnodes : [vnodes])
+		//>>>>>>>
 		updateNodes(dom, dom.vnodes, vnodes, hooks, null, namespace === "http://www.w3.org/1999/xhtml" ? undefined : namespace)
 		dom.vnodes = vnodes
 		// `document.activeElement` can return null: https://html.spec.whatwg.org/multipage/interaction.html#dom-document-activeelement
