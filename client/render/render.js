@@ -99,7 +99,7 @@ module.exports = function($window) {
 		// not using the proper parent makes the child element(s) vanish.
 		//     var div = document.createElement("div")
 		//     div.innerHTML = "<td>i</td><td>j</td>"
-		    console.log(div.innerHTML)
+		//     console.log(div.innerHTML)
 		// --> "ij", no <td> in sight.
 		var temp = $doc.createElement(possibleParents[match[1]] || "div")
 		if (ns === "http://www.w3.org/2000/svg") {
@@ -920,38 +920,73 @@ module.exports = function($window) {
 	//lifecycle
 	function initLifecycle(source, vnode, hooks) {
 		if (typeof source.oninit === "function") callHook.call(source.oninit, vnode)
-
 		//<<<<<<< Modified: Cache state for fetch function
 		if (typeof source.fetch === "function"){
-
+			var attrs = JSON.stringify(vnode.attrs)
 			var state = JSON.stringify(vnode.state)
 		    var func = source.fetch.toString()
-		    var key = hash(state + func)
+		    var key = hash(attrs + state + func)
 		    var cache = vnode.store[key]
+		    var strategy = vnode.state.cache
+		    var hydrate = vnode.state.hydrate
 
-		    if(cache){
-		    	if(typeof cache === 'string'){
-		    		try{
-		    			cache = JSON.parse(cache)
-		    		}
-		    		catch(e){
-		    			cache = {}
-		    		}
-		    	}
-		    	else{
-		    		try{
-		    			cache = JSON.parse(JSON.stringify(cache))
-		    		}
-		    		catch(e){
-		    			cache = {}
-		    		}
-		    	}
-	    		Object.assign(vnode.state, cache)
-	    		vnode.store[key] = vnode.state
-		    } else{
-		    	vnode.store[key] = vnode.state
-		    	callHook.call(source.fetch, vnode)
+		    var shouldFetch = true
+
+		    console.log(cache, strategy, strategy instanceof Date)
+
+		    if(cache && cache.state) strategy = cache.state.cache
+
+		    if(cache && typeof cache === 'string' && hydrate !== false){
+	    		console.log('Build Cache')
+	    		try{
+	    			cache = {
+	    				createdAt: Date.now(),
+	    				state: JSON.parse(cache)
+	    			}
+	    			shouldFetch = false
+	    		}
+	    		catch(e){
+	    			console.log(e)
+	    		}
+	    	}
+		    else if(cache
+		    	&& strategy !== false
+		    	&& cache.createdAt
+		    	&& (
+		    		strategy === undefined
+		    		|| strategy === null
+		    		|| strategy === true
+		    		|| (typeof strategy === 'number' && (Date.now() - cache.createdAt) < strategy)
+		    		|| (typeof strategy === 'string' && Date.now() < new Date(strategy).getTime())
+		    		|| (strategy instanceof Date && Date.now() < strategy.getTime())
+		    	)
+		    ){
+		    	console.log('Use Cache')
+	    		try{
+	    			cache = {
+	    				createdAt: cache.createdAt,
+	    				state: JSON.parse(JSON.stringify(cache.state))
+	    			}
+	    			shouldFetch = false
+	    		}
+	    		catch(e){
+	    			console.log(e)
+	    		}
 		    }
+
+		    if(shouldFetch){
+		    	console.log('Fetch and Cache')
+		    	callHook.call(source.fetch, vnode)
+		    	cache = {
+		    		createdAt: Date.now(),
+		    	}
+		    }
+		    else{
+		    	console.log('Applying Cache')
+		    	Object.assign(vnode.state, cache.state)
+		    }
+		    cache.state = vnode.state
+		    vnode.store[key] = cache
 		}
 		//=======
 		//>>>>>>>

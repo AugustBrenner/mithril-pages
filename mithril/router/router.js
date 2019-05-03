@@ -25,7 +25,6 @@ module.exports = function($window) {
 	}
 
 	function parsePath(path, queryData, hashData) {
-		console.log(path)
 		var queryIndex = path.indexOf("?")
 		var hashIndex = path.indexOf("#")
 		var pathEnd = queryIndex > -1 ? queryIndex : hashIndex > -1 ? hashIndex : path.length

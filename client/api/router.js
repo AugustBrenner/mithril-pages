@@ -39,22 +39,61 @@ module.exports = function($window, redrawService) {
 			else throw new Error("Could not resolve default route " + defaultRoute)
 		}
 		routeService.defineRoutes(routes, function(payload, params, path, route) {
+			//<<<<<<< Modified: Added Lazy route loading
+			var asyncComponent
+
+			if(payload.resolve){
+				asyncComponent = payload
+				payload = payload.component || payload.placeholder
+			}
+
 			var update = lastUpdate = function(routeResolver, comp) {
+				console.log(!!update, !!lastUpdate)
+				console.log(comp)
 				if (update !== lastUpdate) return
 				component = comp != null && (typeof comp.view === "function" || typeof comp === "function")? comp : "div"
 				attrs = params, currentPath = path, lastUpdate = null
 				render = (routeResolver.render || identity).bind(routeResolver)
 				redraw()
 			}
-			if (payload.view || typeof payload === "function") update({}, payload)
-			else {
-				if (payload.onmatch) {
-					Promise.resolve(payload.onmatch(params, path, route)).then(function(resolved) {
-						update(payload, resolved)
-					}, bail)
+
+			if(payload){
+				if (payload.view || typeof payload === "function") update({}, payload)
+				else {
+					if (payload.onmatch) {
+						Promise.resolve(payload.onmatch(params, path, route)).then(function(resolved) {
+							update(payload, resolved)
+						}, bail)
+					}
+					else update(payload, "div")
 				}
-				else update(payload, "div")
 			}
+
+
+			if(asyncComponent && !asyncComponent.resolved){
+				asyncComponent.resolve().then(component => {
+					lastUpdate = update
+					update({}, component)
+				})
+			}
+			//=======
+			// var update = lastUpdate = function(routeResolver, comp) {
+			// 	if (update !== lastUpdate) return
+			// 	component = comp != null && (typeof comp.view === "function" || typeof comp === "function")? comp : "div"
+			// 	attrs = params, currentPath = path, lastUpdate = null
+			// 	render = (routeResolver.render || identity).bind(routeResolver)
+			// 	redraw()
+			// }
+			// if (payload.view || typeof payload === "function") update({}, payload)
+			// else {
+			// 	if (payload.onmatch) {
+			// 		Promise.resolve(payload.onmatch(params, path, route)).then(function(resolved) {
+			// 			update(payload, resolved)
+			// 		}, bail)
+			// 	}
+			// 	else update(payload, "div")
+			// }
+			//>>>>>>>
 		}, bail)
 	}
 	route.set = function(path, data, options) {

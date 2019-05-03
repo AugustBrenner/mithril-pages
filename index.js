@@ -59,18 +59,18 @@ const render = args => (req, res) => {
 
 	const store = {}
 	
-	scripts += `<script>
-		m.scripts = m.trust(
-			document.getElementsByClassName('__mithril_pages_scripts__').map(function(elem){
-				return elem.outerHTML
-			})
-		)
-		m.styles = m.trust(
-			document.getElementsByClassName('__mithril_pages_styles__').map(function(elem){
-				return elem.outerHTML
-			})
-		)
-	</script>`
+	// scripts += `<script>
+	// 	m.scripts = m.trust(
+	// 		document.getElementsByClassName('__mithril_pages_scripts__').map(function(elem){
+	// 			return elem.outerHTML
+	// 		})
+	// 	)
+	// 	m.styles = m.trust(
+	// 		document.getElementsByClassName('__mithril_pages_styles__').map(function(elem){
+	// 			return elem.outerHTML
+	// 		})
+	// 	)
+	// </script>`
 
 
 	const component = route(req.url, args.routes)

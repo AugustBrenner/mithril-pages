@@ -115,12 +115,13 @@ async function setHooks (component, vnode, hooks) {
   }
   //<<<<<<< Modified: Cache state for fetch function
   if (component.fetch) {
+    var attrs = JSON.stringify(vnode.attrs)
     var state = JSON.stringify(vnode.state)
     var func = component.fetch.toString()
 
     await (component.fetch.call(vnode.state, vnode) || async function () {})
-    
-    var key = hash(state + func)
+
+    var key = hash(attrs + state + func)
     vnode.store[key] = JSON.stringify(vnode.state)
   }
   //=======

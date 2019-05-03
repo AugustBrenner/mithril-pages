@@ -12,5 +12,6 @@ m.styles = '__mithril_pages_styles__'
 m.scripts = '__mithril_pages_scripts__'
 
 m.route = function(){}
+m.asyncRequire = function(){}
 
 module.exports = m

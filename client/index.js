@@ -37,4 +37,42 @@ m.PromisePolyfill = require("../mithril/promise/polyfill")
 //>>>>>>>
 
 
+//<<<<<<< Modified: asyncRequire
+function componentStore(){
+
+	var self = this
+
+	self.components = {}
+
+	return function(promise, placeholder, options, key){
+		// console.log('HELLO', placeholder || m('div'), key)
+		// console.log(self)
+		self.components[key] = {
+			promise: promise,
+			resolved: false,
+			component: undefined,
+			placeholder: placeholder,
+			options: options,
+			key: key,
+			resolve: function(){
+				var comp = self.components[key]
+				if(comp.resolved && comp.component) return Promise.resolve(comp.component)
+				else{
+					return comp.promise().then(component => {
+						console.log('COMPONENT', component)
+						comp.component = component
+						comp.resolved = true
+						return component
+					})
+				}
+			}
+		}
+		return self.components[key]
+	}
+}
+
+m.asyncRequire = new componentStore()
+//=======
+//>>>>>>>
+
 module.exports = m

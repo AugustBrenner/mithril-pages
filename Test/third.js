@@ -1,6 +1,6 @@
 const m 		= require('mithril-pages')
 
-var Home = {
+var Page3 = {
 
 	oninit: function(vnode) {		
 		vnode.state.STATE1 = 'STATE1'
@@ -49,7 +49,7 @@ var Home = {
 		return [
 			m('head', [
 				m.styles,
-				m('title', 'Home'),
+				m('title', 'Page 3'),
 			]),
 			m('body', [
 				m('a', {href:'/page2', oncreate: m.route.link}, 'Page 2'),
@@ -72,4 +72,4 @@ var Home = {
 	}
 }
 
-module.exports = Home
+module.exports = Page3

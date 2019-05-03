@@ -1,6 +1,7 @@
 const path = require('path')
 const webpack = require('webpack')
-const StringReplacePlugin = require("string-replace-webpack-plugin")
+const StringReplacePlugin = require('string-replace-webpack-plugin')
+const crypto = require('crypto')
 
 module.exports = function(pathname, dirname, production){
 	
@@ -27,26 +28,42 @@ module.exports = function(pathname, dirname, production){
 		            include: [
           				path.resolve(__dirname, 'bundle-bridge-client.js')
           			],
-		            loader: StringReplacePlugin.replace({
-		                replacements: [
-		                    {
-		                        pattern: /PLACEHOLDER_FOR_ENTRY/g,
-		                        replacement: function (match, p1, offset, string) {
-		                            return pathname
-		                        }
-		                    }
-		                ]
-		            })
+					loader: 'string-replace-loader',
+					options: {
+						search: 'PLACEHOLDER_FOR_ENTRY',
+						replace: pathname,
+					}
 		        },
 		        {
 					test: /\.js$/,
-						exclude: /(node_modules|bower_components)/,
-						use: {
+					exclude: /(node_modules|bower_components|client|mithril)/,
+					use: [
+						{
+							loader: path.resolve(__dirname, './functionReplaceLoader.js'),
+							options:{
+								match: 'm.asyncRequire',
+								replacement: function(match, args, rootContext, resourcePath){
+
+									var path_hash = resourcePath.replace(rootContext, '') + match
+
+									var md5sum = crypto.createHash('md5')
+									md5sum.update(path_hash)
+									path_hash = md5sum.digest('hex')
+
+									console.log(path_hash)
+
+									return  `m.asyncRequire(function(){return import(${args[0]})}, ${args[1]}, ${args[2]}, '${path_hash}')`
+								}
+							}
+						},
+						{
 							loader: 'babel-loader',
 							options: {
-							presets: ['@babel/preset-env']
+								presets: ['@babel/preset-env'],
+								plugins: ["@babel/plugin-syntax-dynamic-import"]
+							}
 						}
-					}
+					]
 				}
 			]
 		},

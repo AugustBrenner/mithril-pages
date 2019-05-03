@@ -1,6 +1,6 @@
 const path = require('path')
 const nodeExternals = require('webpack-node-externals')
-const StringReplacePlugin = require("string-replace-webpack-plugin")
+const StringReplacePlugin = require('string-replace-webpack-plugin')
 
 module.exports = function(pathname, dirname, production){
 	
@@ -30,16 +30,31 @@ module.exports = function(pathname, dirname, production){
 			rules: [
 		        {
 					test: /\.js$/,
-						exclude: /(node_modules|bower_components)/,
-						use: {
+					exclude: /(node_modules|bower_components)/,
+					use: [
+						{
+							loader: path.resolve(__dirname, './functionReplaceLoader.js'),
+							options:{
+								match: 'm.asyncRequire',
+								replacement: function(match, args){
+									return  `require(${args[0]})`
+								}
+							}
+						},
+						{
+
 							loader: 'babel-loader',
 							options: {
-							presets: ['@babel/preset-env']
-						}
-					}
-				}
+								presets: ['@babel/preset-env'],
+							}
+						},
+					]
+				},
 			]
 		},
+		plugins: [
+			new StringReplacePlugin(),
+		],
 	    devtool: 'sourcemap',
 	}
 
