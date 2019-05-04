@@ -38,6 +38,18 @@ m.PromisePolyfill = require("../mithril/promise/polyfill")
 
 
 //<<<<<<< Modified: asyncRequire
+
+m.lazy = {
+	config: {
+		load: 'ref',
+		data: 'ref',
+	},
+	components: {
+		load: function(load){m.lazy.config.load = load},
+		data: function(data){m.lazy.config.data = data},
+	}
+}
+
 function componentStore(){
 
 	var self = this
@@ -45,9 +57,10 @@ function componentStore(){
 	self.components = {}
 
 	return function(promise, placeholder, options, key){
-		// console.log('HELLO', placeholder || m('div'), key)
-		// console.log(self)
-		self.components[key] = {
+
+		options = options || {}
+
+		var component = {
 			promise: promise,
 			resolved: false,
 			component: undefined,
@@ -59,7 +72,7 @@ function componentStore(){
 				if(comp.resolved && comp.component) return Promise.resolve(comp.component)
 				else{
 					return comp.promise().then(component => {
-						console.log('COMPONENT', component)
+						console.log('COMPONENT', component.key)
 						comp.component = component
 						comp.resolved = true
 						return component
@@ -67,11 +80,22 @@ function componentStore(){
 				}
 			}
 		}
-		return self.components[key]
+		
+		self.components[key] = component
+
+		setTimeout(function(){
+
+			var should_load = options.load || m.lazy.config.load
+
+			if(should_load === 'pre') component.resolve()
+		},)
+
+
+		return component
 	}
 }
 
-m.asyncRequire = new componentStore()
+m.lazy.require = new componentStore()
 //=======
 //>>>>>>>
 

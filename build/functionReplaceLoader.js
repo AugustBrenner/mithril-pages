@@ -92,7 +92,7 @@ function tokenizeMemberExpression(node){
 
 
 
-module.exports = function(source, map) {
+module.exports = function(source) {
 
 	// console.time('timer')
 
@@ -113,7 +113,7 @@ module.exports = function(source, map) {
 
 		if(!quick_check_regex.test(source)){
 			// console.timeEnd('timer')
-			return this.callback(null, source, map)
+			return this.callback(null, source)
 		}
 		
 		var match_string = match_tokens.join('.')
@@ -157,6 +157,6 @@ module.exports = function(source, map) {
 	}catch(e){
 		console.log(e)
 	}
-	console.timeEnd('timer')
-	this.callback(null, source, map)
+	// console.timeEnd('timer')
+	this.callback(null, source)
 }

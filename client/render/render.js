@@ -932,7 +932,7 @@ module.exports = function($window) {
 
 		    var shouldFetch = true
 
-		    console.log(cache, strategy, strategy instanceof Date)
+		    // console.log(cache, strategy, strategy instanceof Date)
 
 		    if(cache && cache.state) strategy = cache.state.cache
 

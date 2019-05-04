@@ -35,7 +35,7 @@ module.exports = function(pathname, dirname, production){
 						{
 							loader: path.resolve(__dirname, './functionReplaceLoader.js'),
 							options:{
-								match: 'm.asyncRequire',
+								match: 'm.lazy.require',
 								replacement: function(match, args){
 									return  `require(${args[0]})`
 								}

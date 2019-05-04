@@ -12,6 +12,14 @@ m.styles = '__mithril_pages_styles__'
 m.scripts = '__mithril_pages_scripts__'
 
 m.route = function(){}
-m.asyncRequire = function(){}
+m.route.link = function(){}
+
+m.lazy = {
+	components:{
+		load: function(){},
+		data: function(){},
+		require: function(){}
+	}
+}
 
 module.exports = m

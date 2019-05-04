@@ -1,13 +1,17 @@
 const m 		= require('mithril-pages')
-const Home 		= m.asyncRequire('./home.js', {
+const Home 		= m.lazy.require('./home.js', {
 	view: function(vnode){
 		return [
 			m('head'),
 			m('body', {style: 'height: 100%; width: 100%; background-color: green;'})
 		]
 	}
+}, {
+	load: 'req'
 })
-const Page3 	= m.asyncRequire('./third.js', null)
+const Page3 	= m.lazy.require('./third.js', null, {load:'ref'})
+
+m.lazy.components.load('pre')
 
 // require('./like.svg')
 // require('./styles.css')
@@ -19,7 +23,7 @@ var component = {
 		return m('div', 'Hello!')
 	}
 }
-console.log(m.scripts)
+// console.log(m.scripts)
 
 var Page2 = {
 
@@ -36,8 +40,8 @@ var Page2 = {
 				m.styles,
 			]),
 			m('body', [
-				m('a', {href:'/', oncreate: m.route.link}, 'Home', 'Away', 'from', m({view: function(vnode){return m('div','HOME')}})),
-				m('a', {href:'/page3', oncreate: m.route.link}, 'Page 3'),
+				m('a', {href:'/', oncreate: m.route.link({preload: true})}, 'Home', 'Away', 'from', m({view: function(vnode){return m('div','HOME')}})),
+				m('a', {href:'/page3', oncreate: m.route.link({preload: false})}, 'Page 3'),
 				m('svg', m('use', {'xlink:href': '#icon-like'})),
 				m('pre', {key: 'pre'}, JSON.stringify(vnode.attrs, null, 4)),
 				m(component, {HEllo: 'World'}),

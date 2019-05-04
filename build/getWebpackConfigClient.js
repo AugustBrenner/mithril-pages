@@ -41,7 +41,7 @@ module.exports = function(pathname, dirname, production){
 						{
 							loader: path.resolve(__dirname, './functionReplaceLoader.js'),
 							options:{
-								match: 'm.asyncRequire',
+								match: 'm.lazy.require',
 								replacement: function(match, args, rootContext, resourcePath){
 
 									var path_hash = resourcePath.replace(rootContext, '') + match
@@ -50,9 +50,7 @@ module.exports = function(pathname, dirname, production){
 									md5sum.update(path_hash)
 									path_hash = md5sum.digest('hex')
 
-									console.log(path_hash)
-
-									return  `m.asyncRequire(function(){return import(${args[0]})}, ${args[1]}, ${args[2]}, '${path_hash}')`
+									return  `m.lazy.require(function(){return import(${args[0]})}, ${args[1]}, ${args[2]}, '${path_hash}')`
 								}
 							}
 						},

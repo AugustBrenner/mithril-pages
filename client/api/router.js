@@ -50,8 +50,8 @@ module.exports = function($window, redrawService) {
 			}
 
 			var update = lastUpdate = function(routeResolver, comp) {
-				console.log(!!update, !!lastUpdate)
-				console.log(comp)
+				// console.log(!!update, !!lastUpdate)
+				// console.log(comp)
 				if (update !== lastUpdate) return
 				component = comp != null && (typeof comp.view === "function" || typeof comp === "function")? comp : "div"
 				attrs = params, currentPath = path, lastUpdate = null
@@ -113,9 +113,18 @@ module.exports = function($window, redrawService) {
 		var href = routeService.prefix + vnode.attrs.href
 		vnode.dom.setAttribute("href", href)
 
-		if(!vnode.state._href || vnode.state._href !== 'href'){
+		if(!vnode.state._href || vnode.state._href !== href){
 			routeService.matchRoute(vnode.dom.getAttribute("href"), routesObject, function(component){
-				if(component.resolve && !component.resolved) component.resolve()
+
+				if(component.resolve && !component.resolved){
+
+					var should_load = (component.options.load || m.lazy.config.load) === 'ref'
+
+					if(options.preload === true || options.preload === false) should_load = options.preload
+
+					if(should_load) component.resolve()
+				}
+
 			}, function(error){
 				console.log('ERROR', error)
 			})
