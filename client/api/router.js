@@ -3,7 +3,7 @@
 var Vnode = require("../render/vnode")
 //<<<<<<< Modified: Require path changed to original mithril components
 var Promise = require("../../mithril/promise/promise")
-var coreRouter = require("../../mithril/router/router")
+var coreRouter = require("../router/router")
 //=======
 // var Promise = require("../promise/promise")
 // var coreRouter = require("../router/router")
@@ -13,12 +13,14 @@ module.exports = function($window, redrawService) {
 	var routeService = coreRouter($window)
 
 	var identity = function(v) {return v}
-	var render, component, attrs, currentPath, lastUpdate
+	var render, component, attrs, currentPath, lastUpdate, routesObject
 	//<<<<<<< Modified: Added store to route parameters
 	var route = function(root, defaultRoute, routes, store) {
+		routesObject = routes
 		if(!store) store = {}
 		if(typeof store !== "object") throw new Error("Ensure the store argument is type 'object'.")
 	//=======
+	// var render, component, attrs, currentPath, lastUpdate
 	// var route = function(root, defaultRoute, routes) {
 	//>>>>>>>
 		if (root == null) throw new Error("Ensure the DOM element that was passed to `m.route` is not undefined")
@@ -107,7 +109,21 @@ module.exports = function($window, redrawService) {
 	route.get = function() {return currentPath}
 	route.prefix = function(prefix) {routeService.prefix = prefix}
 	var link = function(options, vnode) {
-		vnode.dom.setAttribute("href", routeService.prefix + vnode.attrs.href)
+		//<<<<<<< Modified: Lazy load any missing components that are linked to
+		var href = routeService.prefix + vnode.attrs.href
+		vnode.dom.setAttribute("href", href)
+
+		if(!vnode.state._href || vnode.state._href !== 'href'){
+			routeService.matchRoute(vnode.dom.getAttribute("href"), routesObject, function(component){
+				if(component.resolve && !component.resolved) component.resolve()
+			}, function(error){
+				console.log('ERROR', error)
+			})
+			vnode.state._href = href
+		}
+		//=======
+		// vnode.dom.setAttribute("href", routeService.prefix + vnode.attrs.href)
+		//>>>>>>>
 		vnode.dom.onclick = function(e) {
 			if (e.ctrlKey || e.metaKey || e.shiftKey || e.which === 2) return
 			e.preventDefault()
