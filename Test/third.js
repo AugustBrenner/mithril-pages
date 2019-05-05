@@ -1,4 +1,6 @@
 const m 		= require('mithril-pages')
+const Comp 		= require('./component2')
+const Async 	= m.lazy.require('./asynccomponent')
 
 var Page3 = {
 
@@ -63,6 +65,8 @@ var Page3 = {
 						vnode.state.increment()
 					}
 				}, '+1'),
+				m(Comp, {key: 'COMP'}),
+				m(Async, {key: 'ASYNC'}),
 				// Array.apply(null, {length: 99999}).map(x => {
 				// 	return m('p', 'hello')
 				// }),

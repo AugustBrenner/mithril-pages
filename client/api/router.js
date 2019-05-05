@@ -4,6 +4,7 @@ var Vnode = require("../render/vnode")
 //<<<<<<< Modified: Require path changed to original mithril components
 var Promise = require("../../mithril/promise/promise")
 var coreRouter = require("../router/router")
+var request = require("../../mithril/request")
 //=======
 // var Promise = require("../promise/promise")
 // var coreRouter = require("../router/router")
@@ -13,10 +14,11 @@ module.exports = function($window, redrawService) {
 	var routeService = coreRouter($window)
 
 	var identity = function(v) {return v}
-	var render, component, attrs, currentPath, lastUpdate, routesObject
+	var render, component, attrs, currentPath, lastUpdate, routesObject, storeObject
 	//<<<<<<< Modified: Added store to route parameters
 	var route = function(root, defaultRoute, routes, store) {
 		routesObject = routes
+		storeObject = store
 		if(!store) store = {}
 		if(typeof store !== "object") throw new Error("Ensure the store argument is type 'object'.")
 	//=======
@@ -50,15 +52,12 @@ module.exports = function($window, redrawService) {
 			}
 
 			var update = lastUpdate = function(routeResolver, comp) {
-				// console.log(!!update, !!lastUpdate)
-				// console.log(comp)
 				if (update !== lastUpdate) return
 				component = comp != null && (typeof comp.view === "function" || typeof comp === "function")? comp : "div"
 				attrs = params, currentPath = path, lastUpdate = null
 				render = (routeResolver.render || identity).bind(routeResolver)
 				redraw()
 			}
-
 			if(payload){
 				if (payload.view || typeof payload === "function") update({}, payload)
 				else {
@@ -114,16 +113,30 @@ module.exports = function($window, redrawService) {
 		vnode.dom.setAttribute("href", href)
 
 		if(!vnode.state._href || vnode.state._href !== href){
-			routeService.matchRoute(vnode.dom.getAttribute("href"), routesObject, function(component){
+			routeService.matchRoute(vnode.dom.getAttribute("href"), routesObject, function(component, params, path, route){
 
-				if(component.resolve && !component.resolved){
+				console.log('LINK', component, params, path, route)
 
-					var should_load = (component.options.load || m.lazy.config.load) === 'ref'
+				if(component.resolve){
 
-					if(options.preload === true || options.preload === false) should_load = options.preload
+					if(!component.resolved){
 
-					if(should_load) component.resolve()
+						var should_load = (component.options.load || m.lazy.config.load) === 'ref'
+
+						if(options.preload === true || options.preload === false) should_load = options.preload
+
+						if(should_load) component.resolve()
+
+					}
 				}
+
+				// var should_fetch_state = false
+
+				// if(options.prefetch === true || options.prefetch === false) should_fetch_state = options.preload
+
+				// if(should_fetch_state){
+				// 	request
+				// }
 
 			}, function(error){
 				console.log('ERROR', error)

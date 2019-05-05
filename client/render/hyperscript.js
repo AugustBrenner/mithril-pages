@@ -83,6 +83,17 @@ function execSelector(state, vnode) {
 }
 
 function hyperscript(selector) {
+	//<<<<<<< Modified: Added store to vnode
+	if(selector && typeof selector.resolve === 'function'){
+		if(selector.resolved) selector = selector.component
+		else{
+			selector.resolve(true)
+			selector = selector.placeholder || 'div'
+		}
+		arguments[0] = selector
+	}
+	//=======
+	//>>>>>>>
 	if (selector == null || typeof selector !== "string" && typeof selector !== "function" && typeof selector.view !== "function") {
 		throw Error("The selector must be either a string or a component.");
 	}

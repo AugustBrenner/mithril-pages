@@ -38,15 +38,22 @@ m.PromisePolyfill = require("../mithril/promise/polyfill")
 
 
 //<<<<<<< Modified: asyncRequire
+var set = function(key){
+	return function(x){
+		m.lazy.config[key] = x
+	}
+}
 
 m.lazy = {
 	config: {
 		load: 'ref',
-		data: 'ref',
+		fetch: 'ref',
+		retry: 3,
 	},
 	components: {
-		load: function(load){m.lazy.config.load = load},
-		data: function(data){m.lazy.config.data = data},
+		load: set('load'),
+		fetch: set('fetch'),
+		retry: set('retry'),
 	}
 }
 
@@ -65,17 +72,34 @@ function componentStore(){
 			resolved: false,
 			component: undefined,
 			placeholder: placeholder,
+			error: undefined,
 			options: options,
 			key: key,
-			resolve: function(){
+			resolving: false, 
+			resolve: function(redraw){
 				var comp = self.components[key]
 				if(comp.resolved && comp.component) return Promise.resolve(comp.component)
 				else{
-					return comp.promise().then(component => {
-						console.log('COMPONENT', component.key)
-						comp.component = component
-						comp.resolved = true
-						return component
+					if(comp.resolving) return Promise.resolve(comp.component)
+					comp.resolving = true
+					return new Promise(function(resolve, reject){
+						setTimeout(function(){
+							return comp.promise().then(component => {
+								console.log('COMPONENT', component.key)
+								comp.component = component
+								resolve(component)
+							})
+							.catch(error => {
+								console.log(error)
+								comp.component =  comp.error
+								resolve(comp.component)
+							})
+							.finally(function(){
+								comp.resolved = true
+								comp.resolving = false
+								if(redraw) m.redraw()
+							})
+						},0)
 					})
 				}
 			}

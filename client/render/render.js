@@ -515,6 +515,10 @@ module.exports = function($window) {
 	}
 	function updateFragment(parent, old, vnode, hooks, nextSibling, ns) {
 		// console.log('updateFragment', vnode.store)
+		//<<<<<<< Modified: Added store to vnode
+		setStore(vnode.children, vnode.store)
+		//=======
+		//>>>>>>>
 		updateNodes(parent, old.children, vnode.children, hooks, nextSibling, ns)
 		var domSize = 0, children = vnode.children
 		vnode.dom = null
@@ -551,6 +555,7 @@ module.exports = function($window) {
 			//<<<<<<< Modified: Added store to vnode
 			if (old.text != null) old.children = [Vnode("#", undefined, undefined, undefined, old.text, undefined, old.dom.firstChild)]
 			if (vnode.text != null) vnode.children = [Vnode("#", undefined, undefined, undefined, vnode.text, undefined, undefined)]
+			setStore(vnode.children, vnode.store)
 			//=======
 			// if (old.text != null) old.children = [Vnode("#", undefined, undefined, old.text, undefined, old.dom.firstChild)]
 			// if (vnode.text != null) vnode.children = [Vnode("#", undefined, undefined, vnode.text, undefined, undefined)]
@@ -560,7 +565,11 @@ module.exports = function($window) {
 	}
 	function updateComponent(parent, old, vnode, hooks, nextSibling, ns) {
 		// console.log('updateComponent', vnode.store)
-		vnode.instance = Vnode.normalize(callHook.call(vnode.state.view, vnode))
+		//<<<<<<< Modified: Added store to vnode
+		vnode.instance = Vnode.normalize(callHook.call(vnode.state.view, vnode), vnode.store)
+		//=======
+		// vnode.instance = Vnode.normalize(callHook.call(vnode.state.view, vnode))
+		//>>>>>>>
 		if (vnode.instance === vnode) throw Error("A view cannot return the vnode it received as argument")
 		updateLifecycle(vnode.state, vnode, hooks)
 		if (vnode.attrs != null) updateLifecycle(vnode.attrs, vnode, hooks)
@@ -931,8 +940,6 @@ module.exports = function($window) {
 		    var hydrate = vnode.state.hydrate
 
 		    var shouldFetch = true
-
-		    // console.log(cache, strategy, strategy instanceof Date)
 
 		    if(cache && cache.state) strategy = cache.state.cache
 

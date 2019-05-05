@@ -50,9 +50,7 @@ module.exports = function() {
 	}
 	
 	//<<<<<<< Modified: Added store to vnode
-	var store = arguments[arguments.length -1]
-
-	return Vnode("", attrs.key, attrs, store, children)
+	return Vnode("", attrs.key, attrs, undefined, children)
 	//=======
 	// return Vnode("", attrs.key, attrs, children)
 	//>>>>>>>
