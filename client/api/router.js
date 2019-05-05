@@ -4,7 +4,8 @@ var Vnode = require("../render/vnode")
 //<<<<<<< Modified: Require path changed to original mithril components
 var Promise = require("../../mithril/promise/promise")
 var coreRouter = require("../router/router")
-var request = require("../../mithril/request")
+var request = require("../../mithril/request.js").request
+var buildQueryString = require("../../mithril/querystring/build")
 //=======
 // var Promise = require("../promise/promise")
 // var coreRouter = require("../router/router")
@@ -115,7 +116,7 @@ module.exports = function($window, redrawService) {
 		if(!vnode.state._href || vnode.state._href !== href){
 			routeService.matchRoute(vnode.dom.getAttribute("href"), routesObject, function(component, params, path, route){
 
-				console.log('LINK', component, params, path, route)
+				// console.log(route)
 
 				if(component.resolve){
 
@@ -130,13 +131,32 @@ module.exports = function($window, redrawService) {
 					}
 				}
 
-				// var should_fetch_state = false
+				var should_fetch_state = false
 
-				// if(options.prefetch === true || options.prefetch === false) should_fetch_state = options.preload
+				if(options.prefetch === true || options.prefetch === false) should_fetch_state = options.prefetch
 
-				// if(should_fetch_state){
-				// 	request
-				// }
+				if(should_fetch_state){
+
+					var queryData = {}
+					var hashData = {}
+
+					routeService.parsePath(path, queryData, hashData)
+
+					var data_path = route
+
+					if(data_path ===  '/') data_path += '__index__'
+
+					var query = buildQueryString(queryData)
+					if (query) data_path += "?" + query
+					data_path += '.json'
+
+					request(data_path).then(function(data){
+						Object.assign(storeObject, data)
+
+						console.log(storeObject)
+					})
+					.catch(console.log)
+				}
 
 			}, function(error){
 				console.log('ERROR', error)

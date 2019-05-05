@@ -85,7 +85,6 @@ function componentStore(){
 					return new Promise(function(resolve, reject){
 						setTimeout(function(){
 							return comp.promise().then(component => {
-								console.log('COMPONENT', component.key)
 								comp.component = component
 								resolve(component)
 							})
@@ -97,7 +96,11 @@ function componentStore(){
 							.finally(function(){
 								comp.resolved = true
 								comp.resolving = false
-								if(redraw) m.redraw()
+								if(redraw){
+									setTimeout(function(){
+										m.redraw()
+									},0)
+								}
 							})
 						},0)
 					})

@@ -939,6 +939,8 @@ module.exports = function($window) {
 		    var strategy = vnode.state.cache
 		    var hydrate = vnode.state.hydrate
 
+		    console.log(key, vnode.store)
+
 		    var shouldFetch = true
 
 		    if(cache && cache.state) strategy = cache.state.cache

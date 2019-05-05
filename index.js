@@ -2,6 +2,7 @@
 
 const fs 						= require('fs')
 const path 						= require('path')
+const url 						= require("url")
 const webpack 					= require('webpack')
 const MemoryFileSystem 			= require('memory-fs')
 const requireFromString 		= require('require-from-string')
@@ -57,13 +58,28 @@ const render = args => (req, res) => {
 		.map((path) => `<script class= "__mithril_pages_scripts__" src="${path}"></script>`)
 		.join('\n')
 
+	var req_url = req.url
+
+	var fetch_data_only = false
+
+	if(/\.json$/.test(req.url)){
+		
+		req_url = req_url.replace(/^\/__index__/, '/')
+
+		req_url = req_url.replace(/\.json$/, '')
+
+		fetch_data_only = true
+	}
+
+
 	const store = {}
 
+	const component = route(req_url, args.routes)
 
-	const component = route(req.url, args.routes)
 
+	componentToHtml(component.component, component.params, {store: store, path: req.url, data_only: fetch_data_only}).then(view => {
 
-	componentToHtml(component.component, component.params, {store: store, path: req.url}).then(view => {
+		if(fetch_data_only) return res.json(store)
 
 		scripts = `<script>window.__mithril_pages_store__ = ${JSON.stringify(store)}</script>` + scripts
 

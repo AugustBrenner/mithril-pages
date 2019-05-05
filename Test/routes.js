@@ -33,15 +33,15 @@ var Page2 = {
 	},
 		
 	view: function(vnode) {
-		console.log('page', vnode.store)
+		// console.log('page', vnode.store)
 		return [
 			m('head', [
 				m('title', 'Page 2'),
 				m.styles,
 			]),
 			m('body', [
-				m('a', {href:'/', oncreate: m.route.link({preload: true})}, 'Home', 'Away', 'from', m({view: function(vnode){return m('div','HOME')}})),
-				m('a', {href:'/page3?hello=hello', oncreate: m.route.link({preload: false})}, 'Page 3'),
+				m('a', {href:'/', oncreate: m.route.link({preload: true, prefetch: true})}, 'Home', 'Away', 'from', m({view: function(vnode){return m('div','HOME')}})),
+				m('a', {href:'/page3?hello=hello', oncreate: m.route.link({preload: false, prefetch: true})}, 'Page 3'),
 				m('svg', m('use', {'xlink:href': '#icon-like'})),
 				m('pre', {key: 'pre'}, JSON.stringify(vnode.attrs, null, 4)),
 				m(component, {HEllo: 'World'}),
