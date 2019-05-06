@@ -1,9 +1,12 @@
 "use strict"
 
 var Vnode = require("../render/vnode")
+var coreRouter = require("../router/router")
 
 module.exports = function($window) {
 	var $doc = $window.document
+
+	var routeService = coreRouter(window)
 
 	var nameSpace = {
 		svg: "http://www.w3.org/2000/svg",
@@ -931,7 +934,11 @@ module.exports = function($window) {
 		if (typeof source.oninit === "function") callHook.call(source.oninit, vnode)
 		//<<<<<<< Modified: Cache state for fetch function
 		if (typeof source.fetch === "function"){
-			var attrs = JSON.stringify(vnode.attrs)
+
+			var attrs = Object.assign({}, vnode.attrs)
+			attrs.hash = undefined
+			attrs.history = undefined
+			attrs = JSON.stringify(attrs)
 			var state = JSON.stringify(vnode.state)
 		    var func = source.fetch.toString()
 		    var key = hash(attrs + state + func)
@@ -939,56 +946,46 @@ module.exports = function($window) {
 		    var strategy = vnode.state.cache
 		    var hydrate = vnode.state.hydrate
 
-		    console.log(key, vnode.store)
-
 		    var shouldFetch = true
 
-		    if(cache && cache.state) strategy = cache.state.cache
+		    if(!cache) cache = {}
+		    if(!cache.createdAt) cache.createdAt = Date.now()
+		    if(!cache.path) cache.path = routeService.buildDataPath()
+		    if(strategy === false) cache.expiresAt = 0
+		    if(strategy === true || strategy === null || strategy === undefined) cache.expiresAt = Infinity
+		    if(typeof strategy === 'number') cache.expiresAt = cache.createdAt + strategy
+		    if(typeof strategy === 'string' || strategy instanceof Date) cache.expiresAt = new Date(strategy).getTime()
 
-		    if(cache && typeof cache === 'string' && hydrate !== false){
+
+		    if(typeof cache.state === 'string' && hydrate !== false){
 	    		console.log('Build Cache')
 	    		try{
-	    			cache = {
-	    				createdAt: Date.now(),
-	    				state: JSON.parse(cache)
-	    			}
+	    			cache
+	    			cache.state = JSON.parse(cache.state)
 	    			shouldFetch = false
 	    		}
 	    		catch(e){
 	    			console.log(e)
 	    		}
 	    	}
-		    else if(cache
-		    	&& strategy !== false
-		    	&& cache.createdAt
-		    	&& (
-		    		strategy === undefined
-		    		|| strategy === null
-		    		|| strategy === true
-		    		|| (typeof strategy === 'number' && (Date.now() - cache.createdAt) < strategy)
-		    		|| (typeof strategy === 'string' && Date.now() < new Date(strategy).getTime())
-		    		|| (strategy instanceof Date && Date.now() < strategy.getTime())
-		    	)
-		    ){
+		    else if(cache.state && Date.now() < cache.expiresAt){
 		    	console.log('Use Cache')
 	    		try{
-	    			cache = {
-	    				createdAt: cache.createdAt,
-	    				state: JSON.parse(JSON.stringify(cache.state))
-	    			}
+	    			cache.state = JSON.parse(JSON.stringify(cache.state))
 	    			shouldFetch = false
 	    		}
 	    		catch(e){
 	    			console.log(e)
 	    		}
 		    }
+		    else if(cache.state){
+		    	console.log('Expire Cache')
+		    	delete vnode.store[key]
+		    }
 
 		    if(shouldFetch){
 		    	console.log('Fetch and Cache')
 		    	callHook.call(source.fetch, vnode)
-		    	cache = {
-		    		createdAt: Date.now(),
-		    	}
 		    }
 		    else{
 		    	console.log('Applying Cache')
@@ -996,6 +993,9 @@ module.exports = function($window) {
 		    }
 		    cache.state = vnode.state
 		    vnode.store[key] = cache
+		    if(!vnode.store[cache.path]) vnode.store[cache.path] = {}
+		    vnode.store[cache.path][key] = cache.expiresAt
+
 		}
 		//=======
 		//>>>>>>>

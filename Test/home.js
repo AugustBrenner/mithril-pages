@@ -12,7 +12,7 @@ var Home = {
 		}
 
 		// vnode.state.cache = false
-		// vnode.state.cache = 5000
+		vnode.state.cache = 5000
 		// vnode.state.hydrate = false
 
 	},

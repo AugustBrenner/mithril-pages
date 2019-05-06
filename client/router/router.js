@@ -47,6 +47,23 @@ module.exports = function($window) {
 		}
 		return path.slice(0, pathEnd)
 	}
+
+	router.buildDataPath = function(path){
+
+		if(!path) path = $window.location.pathname + $window.location.search
+
+		var queryData = {}
+
+		var data_path = router.parsePath(path, queryData, {})
+
+		if(data_path ===  '/') data_path += '__index__'
+
+		var query = buildQueryString(queryData)
+		if (query) data_path += "?" + query
+		data_path += '.json'
+
+		return data_path
+	}
 	//=======
 	// function parsePath(path, queryData, hashData) {
 	// 	var queryIndex = path.indexOf("?")
@@ -107,12 +124,16 @@ module.exports = function($window) {
 	//<<<<<<< Modified: Added store to vnode
 	router.matchRoute = function(path, routes, resolve, reject){
 
+		var query = {}
+		var hash = {}
 		var params = {}
-		var pathname = router.parsePath(path, params, params)
+		var history = {}
+
+		var pathname = router.parsePath(path, query, hash)
 
 		var state = $window.history.state
 		if (state != null) {
-			for (var k in state) params[k] = state[k]
+			for (var k in state) history[k] = state[k]
 		}
 
 		for (var route in routes) {
@@ -125,7 +146,8 @@ module.exports = function($window) {
 					for (var i = 0; i < keys.length; i++) {
 						params[keys[i].replace(/:|\./g, "")] = decodeURIComponent(values[i])
 					}
-					resolve(routes[route], params, path, route)
+					var allParams = {query: query, params: params, hash: hash, history: history}
+					resolve(routes[route], allParams, path, route)
 				})
 				return
 			}

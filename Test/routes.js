@@ -40,8 +40,8 @@ var Page2 = {
 				m.styles,
 			]),
 			m('body', [
-				m('a', {href:'/', oncreate: m.route.link({preload: true, prefetch: true})}, 'Home', 'Away', 'from', m({view: function(vnode){return m('div','HOME')}})),
-				m('a', {href:'/page3?hello=hello', oncreate: m.route.link({preload: false, prefetch: true})}, 'Page 3'),
+				m('a', {href:'/', oncreate: m.route.link({preload: false, prefetch: true})}, 'Home', 'Away', 'from', m({view: function(vnode){return m('div','HOME')}})),
+				m('a', {href:'/page3?hello=hello#hash', oncreate: m.route.link({preload: false, prefetch: true})}, 'Page 3'),
 				m('svg', m('use', {'xlink:href': '#icon-like'})),
 				m('pre', {key: 'pre'}, JSON.stringify(vnode.attrs, null, 4)),
 				m(component, {HEllo: 'World'}),
@@ -65,7 +65,8 @@ const router 	= {
 
 	'/page2'              	: Page2,
 	'/page2/:param2...' 	: Page2,
-	'/page3'				: Page3
+	'/page3'				: Page3,
+	'/page3/:hola...'		: Page3,
 
 }
 

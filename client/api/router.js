@@ -137,25 +137,52 @@ module.exports = function($window, redrawService) {
 
 				if(should_fetch_state){
 
-					var queryData = {}
-					var hashData = {}
+					var data_path = routeService.buildDataPath(path)
 
-					routeService.parsePath(path, queryData, hashData)
+					var pathsObject = storeObject[data_path] || {}
 
-					var data_path = route
+					var expired = false
 
-					if(data_path ===  '/') data_path += '__index__'
+					var data_paths = Object.keys(pathsObject)
 
-					var query = buildQueryString(queryData)
-					if (query) data_path += "?" + query
-					data_path += '.json'
+					if(data_paths.length === 0){
+						expired = true
+					}
+					else{
+						data_paths.forEach(function(path){
+							if(pathsObject[path] < Date.now()) expired = true
+						})
+					}
 
-					request(data_path).then(function(data){
-						Object.assign(storeObject, data)
+					if(expired){
+						request(data_path).then(function(data){
 
-						console.log(storeObject)
-					})
-					.catch(console.log)
+							Object.keys(data).forEach(function(key){
+								var cache = data[key]
+								cache.createdAt = Date.now()
+								try{
+									cache.state = JSON.parse(cache.state)
+								}
+								catch(e){
+									console.log(e)
+								}
+
+								var strategy = cache.state.cache
+
+								if(strategy === false) cache.expiresAt = 0
+							    if(strategy === true || strategy === null || strategy === undefined) cache.expiresAt = Infinity
+							    if(typeof strategy === 'number') cache.expiresAt = cache.createdAt + strategy
+							    if(typeof strategy === 'string' || strategy instanceof Date) cache.expiresAt = new Date(strategy).getTime()
+console.log('CACHE', cache)
+								storeObject[key] = cache
+
+								if(!storeObject[cache.path]) storeObject[cache.path] = {}
+
+								storeObject[cache.path][key] = cache.expiresAt
+							})
+						})
+						.catch(console.log)
+					}
 				}
 
 			}, function(error){

@@ -33,9 +33,13 @@ function normalize(url_part, fragment) {
 
 var Router = function(originalUrl, routes){
 
-	var matchRoutes = function(pathname, params){
+	var matchRoutes = function(pathname, query){
 
-		var results = {component: null, params: params}
+		var args = {}
+
+		args.query = query
+
+		var results = {component: null, params: args}
 
 		for (var route in routes) {
 			var matcher = new RegExp("^" + route.replace(/:[^\/]+?\.{3}/g, "(.*?)").replace(/:[^\/]+/g, "([^\\/]+)") + "\/?$")
@@ -43,11 +47,13 @@ var Router = function(originalUrl, routes){
 				pathname.replace(matcher, function() {
 					var keys = route.match(/:[^\/]+/g) || []
 					var values = [].slice.call(arguments, 1, -2)
+					var params = {}
 					for (var i = 0; i < keys.length; i++) {
 						params[keys[i].replace(/:|\./g, "")] = decodeURIComponent(values[i])
 					}
+					args.params = params
 
-					results = {component: routes[route], params: params}
+					results = {component: routes[route], params: args}
 				})
 				break
 			}
@@ -57,7 +63,7 @@ var Router = function(originalUrl, routes){
 
 			results.component = {view: function(){ return c('p', 'Loading...')}}
 			
-			results.params = {}
+			results.params = {params: {}, query: {}}
 
 			return results
 		}
@@ -91,7 +97,22 @@ var Router = function(originalUrl, routes){
 
 
 
+Router.buildDataPath = function(path){
 
+	if(!path) path = $window.location.pathname + $window.location.search
+
+	var queryData = {}
+
+	var data_path = parsePath(path, queryData, {})
+
+	if(data_path ===  '/') data_path += '__index__'
+
+	var query = buildQueryString(queryData)
+	if (query) data_path += "?" + query
+	data_path += '.json'
+
+	return data_path
+}
 
 
 

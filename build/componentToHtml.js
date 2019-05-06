@@ -116,6 +116,7 @@ async function setHooks (component, vnode, hooks) {
   //<<<<<<< Modified: Cache state for fetch function
   if (component.fetch) {
     var attrs = JSON.stringify(vnode.attrs)
+    console.log('ATTRS', attrs)
     var state = JSON.stringify(vnode.state)
     var func = component.fetch.toString()
 

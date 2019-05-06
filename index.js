@@ -79,6 +79,13 @@ const render = args => (req, res) => {
 
 	componentToHtml(component.component, component.params, {store: store, path: req.url, data_only: fetch_data_only}).then(view => {
 
+		const data_path = route.buildDataPath(req_url)
+		Object.keys(store).forEach(key => {
+			store[key] = {path: data_path, state: store[key]}
+		})
+
+		console.log(req_url, store)
+
 		if(fetch_data_only) return res.json(store)
 
 		scripts = `<script>window.__mithril_pages_store__ = ${JSON.stringify(store)}</script>` + scripts

@@ -96,11 +96,9 @@ function componentStore(){
 							.finally(function(){
 								comp.resolved = true
 								comp.resolving = false
-								if(redraw){
-									setTimeout(function(){
-										m.redraw()
-									},0)
-								}
+								setTimeout(function(){
+									m.redraw()
+								},0)
 							})
 						},0)
 					})
