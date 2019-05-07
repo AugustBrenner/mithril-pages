@@ -1,7 +1,7 @@
 'use strict'
 
 
-var c 				 = require("../client/hyperscript.js")
+var m 				 = require("../client/hyperscript.js")
 var buildQueryString = require("../mithril/querystring/build")
 var parseQueryString = require("../mithril/querystring/parse")
 var url 			 = require("url")
@@ -61,7 +61,7 @@ var Router = function(originalUrl, routes){
 
 		if(!results.component){
 
-			results.component = {view: function(){ return c('p', 'Loading...')}}
+			results.component = {view: function(){ return m('p', 'Loading...')}}
 			
 			results.params = {params: {}, query: {}}
 

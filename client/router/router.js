@@ -138,7 +138,6 @@ module.exports = function($window) {
 
 		for (var route in routes) {
 			var matcher = new RegExp("^" + route.replace(/:[^\/]+?\.{3}/g, "(.*?)").replace(/:[^\/]+/g, "([^\\/]+)") + "\/?$")
-
 			if (matcher.test(pathname)) {
 				pathname.replace(matcher, function() {
 					var keys = route.match(/:[^\/]+/g) || []

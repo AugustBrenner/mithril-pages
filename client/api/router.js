@@ -19,9 +19,10 @@ module.exports = function($window, redrawService) {
 	//<<<<<<< Modified: Added store to route parameters
 	var route = function(root, defaultRoute, routes, store) {
 		routesObject = routes
-		storeObject = store
 		if(!store) store = {}
+		storeObject = store
 		if(typeof store !== "object") throw new Error("Ensure the store argument is type 'object'.")
+
 	//=======
 	// var render, component, attrs, currentPath, lastUpdate
 	// var route = function(root, defaultRoute, routes) {
@@ -173,7 +174,6 @@ module.exports = function($window, redrawService) {
 							    if(strategy === true || strategy === null || strategy === undefined) cache.expiresAt = Infinity
 							    if(typeof strategy === 'number') cache.expiresAt = cache.createdAt + strategy
 							    if(typeof strategy === 'string' || strategy instanceof Date) cache.expiresAt = new Date(strategy).getTime()
-console.log('CACHE', cache)
 								storeObject[key] = cache
 
 								if(!storeObject[cache.path]) storeObject[cache.path] = {}

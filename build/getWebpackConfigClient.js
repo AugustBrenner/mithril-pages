@@ -13,7 +13,7 @@ module.exports = function(pathname, dirname, production){
 		],
 		output: {
 			path: dirname,
-	        filename: 'bundle_client.js',
+	        filename: 'bundle.js',
 	        library: 'app',
 	        libraryTarget: 'umd'
 	    },
@@ -44,13 +44,13 @@ module.exports = function(pathname, dirname, production){
 								match: 'm.lazy.require',
 								replacement: function(match, args, rootContext, resourcePath){
 
-									var path_hash = resourcePath.replace(rootContext, '') + match
+									var resource_path = resourcePath.replace(rootContext, '')
 
 									var md5sum = crypto.createHash('md5')
-									md5sum.update(path_hash)
-									path_hash = md5sum.digest('hex')
+									md5sum.update(resource_path + match)
+									var path_hash = md5sum.digest('hex')
 
-									return  `m.lazy.require(function(){return import(${args[0]})}, ${args[1]}, ${args[2]}, '${path_hash}')`
+									return  `m.lazy.require(function(){return import(/* webpackChunkName: "${path_hash}" */ ${args[0]})}, ${args[1]}, ${args[2]}, '${path_hash}', '${resource_path}')`
 								}
 							}
 						},

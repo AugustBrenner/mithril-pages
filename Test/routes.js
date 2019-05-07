@@ -12,6 +12,7 @@ const Home 		= m.lazy.require('./home.js', {
 const Page3 	= m.lazy.require('./third.js', null, {load:'ref'})
 
 m.lazy.components.load('pre')
+// m.lazy.components.fetch('pre')
 
 // require('./like.svg')
 // require('./styles.css')
@@ -40,8 +41,8 @@ var Page2 = {
 				m.styles,
 			]),
 			m('body', [
-				m('a', {href:'/', oncreate: m.route.link({preload: false, prefetch: true})}, 'Home', 'Away', 'from', m({view: function(vnode){return m('div','HOME')}})),
-				m('a', {href:'/page3?hello=hello#hash', oncreate: m.route.link({preload: false, prefetch: true})}, 'Page 3'),
+				m('a', {href:'/', oncreate: m.route.link({preload: true, prefetch: true})}, 'Home', 'Away', 'from', m({view: function(vnode){return m('div','HOME')}})),
+				m('a', {href:'/page3?hello=hello#hash', oncreate: m.route.link({preload: false, prefetch: false})}, 'Page 3'),
 				m('svg', m('use', {'xlink:href': '#icon-like'})),
 				m('pre', {key: 'pre'}, JSON.stringify(vnode.attrs, null, 4)),
 				m(component, {HEllo: 'World'}),

@@ -1,10 +1,10 @@
 'use strict'
 
-var c = require('../index.js')
+var m = require('../index.js')
 
 
 module.exports = {
     view: function(vnode) {
-        return c('h1', vnode.attrs.text)
+        return m('h1', vnode.attrs.text)
     }
 }

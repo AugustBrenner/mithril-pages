@@ -52,7 +52,6 @@ const render = args => (req, res) => {
 		.map((path) => filesystem.readFileSync(outputPath + '/' + path))
 		.join('\n')
 
-
 	var scripts = normalizeAssets(assetsByChunkName.main)
 		.filter((path) => path.endsWith('.js'))
 		.map((path) => `<script class= "__mithril_pages_scripts__" src="${path}"></script>`)
@@ -79,14 +78,22 @@ const render = args => (req, res) => {
 
 	componentToHtml(component.component, component.params, {store: store, path: req.url, data_only: fetch_data_only}).then(view => {
 
+		var hashes = store.__hashes || []
+		store.__hashes = undefined
+		delete store.__hashes
+
 		const data_path = route.buildDataPath(req_url)
 		Object.keys(store).forEach(key => {
 			store[key] = {path: data_path, state: store[key]}
 		})
 
-		console.log(req_url, store)
-
 		if(fetch_data_only) return res.json(store)
+		
+		var bundles = hashes.map(hash => {
+			return assetsByChunkName[hash]
+		})
+
+		scripts = bundles.map(path => `<script class= "__mithril_pages_scripts__" src="${path}"></script>`).join('\n') + scripts
 
 		scripts = `<script>window.__mithril_pages_store__ = ${JSON.stringify(store)}</script>` + scripts
 

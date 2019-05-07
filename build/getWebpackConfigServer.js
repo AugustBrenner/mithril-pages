@@ -1,4 +1,5 @@
 const path = require('path')
+const crypto = require('crypto')
 const nodeExternals = require('webpack-node-externals')
 const StringReplacePlugin = require('string-replace-webpack-plugin')
 
@@ -36,8 +37,15 @@ module.exports = function(pathname, dirname, production){
 							loader: path.resolve(__dirname, './functionReplaceLoader.js'),
 							options:{
 								match: 'm.lazy.require',
-								replacement: function(match, args){
-									return  `require(${args[0]})`
+								replacement: function(match, args, rootContext, resourcePath){
+
+									var path_hash = resourcePath.replace(rootContext, '') + match
+
+									var md5sum = crypto.createHash('md5')
+									md5sum.update(path_hash)
+									path_hash = md5sum.digest('hex')
+
+									return  `m.lazy.require(require(${args[0]}), '${path_hash}')`
 								}
 							}
 						},

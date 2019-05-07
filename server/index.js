@@ -18,7 +18,10 @@ m.lazy = {
 	components:{
 		load: function(){},
 		data: function(){},
-		require: function(){}
+	},
+	require: function(component, fileHash){
+		component.__hash = fileHash
+		return component
 	}
 }
 

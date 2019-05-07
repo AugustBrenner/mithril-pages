@@ -12,7 +12,7 @@ var Home = {
 		}
 
 		// vnode.state.cache = false
-		vnode.state.cache = 5000
+		// vnode.state.cache = 10000
 		// vnode.state.hydrate = false
 
 	},
@@ -52,7 +52,7 @@ var Home = {
 				m('title', 'Home'),
 			]),
 			m('body', [
-				m('a', {href:'/page2', oncreate: m.route.link}, 'Page 2'),
+				m('a', {href:'/page2', oncreate: m.route.link({preload: false, prefetch: false})}, 'Page 2'),
 				m('pre', JSON.stringify(vnode.state.greetings, null, 4)),
 				m('pre', vnode.state.counter),
 				// m('div', 'HELLO'),
