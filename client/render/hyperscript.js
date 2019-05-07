@@ -85,7 +85,7 @@ function execSelector(state, vnode) {
 function hyperscript(selector) {
 	//<<<<<<< Modified: Added store to vnode
 	if(selector && typeof selector.resolve === 'function'){
-		if(selector.resolved) selector = selector.component
+		if(selector.resolved && selector.component) selector = selector.component
 		else{
 			selector.resolve(true)
 			selector = selector.placeholder || 'div'

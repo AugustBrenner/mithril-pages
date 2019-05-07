@@ -46,13 +46,6 @@ module.exports = function($window, redrawService) {
 		}
 		routeService.defineRoutes(routes, function(payload, params, path, route) {
 			//<<<<<<< Modified: Added Lazy route loading
-			var asyncComponent
-
-			if(payload.resolve){
-				asyncComponent = payload
-				payload = payload.component || payload.placeholder
-			}
-
 			var update = lastUpdate = function(routeResolver, comp) {
 				if (update !== lastUpdate) return
 				component = comp != null && (typeof comp.view === "function" || typeof comp === "function")? comp : "div"
@@ -60,7 +53,21 @@ module.exports = function($window, redrawService) {
 				render = (routeResolver.render || identity).bind(routeResolver)
 				redraw()
 			}
-			if(payload){
+
+			var asyncComponent
+
+			if(payload.resolve){
+				asyncComponent = payload
+				payload = payload.component || payload.placeholder
+			}
+
+			if(asyncComponent && asyncComponent.resolved){
+				asyncComponent.resolve().then(component => {
+					lastUpdate = update
+					update({}, component)
+				})
+			}
+			else if(payload){
 				if (payload.view || typeof payload === "function") update({}, payload)
 				else {
 					if (payload.onmatch) {
@@ -71,7 +78,6 @@ module.exports = function($window, redrawService) {
 					else update(payload, "div")
 				}
 			}
-
 
 			if(asyncComponent && !asyncComponent.resolved){
 				asyncComponent.resolve().then(component => {

@@ -15,10 +15,8 @@ m.route = function(){}
 m.route.link = function(){}
 
 m.lazy = {
-	components:{
-		load: function(){},
-		data: function(){},
-	},
+	load: function(){},
+	fetch: function(){},
 	require: function(component, fileHash){
 		component.__hash = fileHash
 		return component

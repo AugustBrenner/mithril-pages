@@ -17,7 +17,11 @@ m.styles = m.trust(
 	}).join('')
 )
 
-m.route(document.documentElement, '/', routes, window.__mithril_pages_store__)
+console.time('timere')
+m.lazy.resolveAvailable().then(function(){
+	console.timeEnd('timere')
+	m.route(document.documentElement, '/', routes, window.__mithril_pages_store__)
+})
 
 if (module.hot) {
 	module.hot.accept()

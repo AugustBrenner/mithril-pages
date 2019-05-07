@@ -47,7 +47,7 @@ var Page3 = {
 	},
  
 	view: function(vnode) {
-		console.log('page3', vnode.attrs)
+		// console.log('page3', vnode.attrs)
 		return [
 			m('head', [
 				m.styles,

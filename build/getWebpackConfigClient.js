@@ -44,13 +44,19 @@ module.exports = function(pathname, dirname, production){
 								match: 'm.lazy.require',
 								replacement: function(match, args, rootContext, resourcePath){
 
+									var require_path = path.resolve(path.dirname(resourcePath), args[0].replace(/\'|\`|\"/g, ''))
+
+									require_path = require_path.replace(rootContext, '.')
+
+									console.log(require_path)
+
 									var resource_path = resourcePath.replace(rootContext, '')
 
 									var md5sum = crypto.createHash('md5')
 									md5sum.update(resource_path + match)
 									var path_hash = md5sum.digest('hex')
 
-									return  `m.lazy.require(function(){return import(/* webpackChunkName: "${path_hash}" */ ${args[0]})}, ${args[1]}, ${args[2]}, '${path_hash}', '${resource_path}')`
+									return  `m.lazy.require(function(){return import(/* webpackChunkName: "${path_hash}" */ ${args[0]})}, ${args[1]}, ${args[2]}, '${path_hash}', '${require_path}')`
 								}
 							}
 						},
