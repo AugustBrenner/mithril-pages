@@ -3,22 +3,7 @@ const Comp 		= require('./component2')
 const Async 	= m.lazy.require('./asynccomponent')
 
 var Page3 = {
-
-	oninit: function(vnode) {		
-		vnode.state.STATE1 = 'STATE1'
-
-		vnode.state.counter = 0
-
-		vnode.state.increment = function(){
-			vnode.state.counter++
-		}
-
-		// vnode.state.cache = false
-		// vnode.state.cache = 5000
-		// vnode.state.hydrate = false
-
-	},
-
+	
 	fetch: function(vnode){
 
 		return new Promise((resolve, reject) => {
@@ -37,6 +22,21 @@ var Page3 = {
 
 			m.redraw()
 		})
+	},
+
+	oninit: function(vnode) {		
+		vnode.state.STATE1 = 'STATE1'
+
+		vnode.state.counter = 0
+
+		vnode.state.increment = function(){
+			vnode.state.counter++
+		}
+
+		// vnode.state.cache = false
+		// vnode.state.cache = 5000
+		// vnode.state.hydrate = false
+
 	},
 
 	oncreate: function(vnode){

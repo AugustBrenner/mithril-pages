@@ -51,7 +51,9 @@ function matchCallExpressions(node, caller_name){
 
 	traverse(node, function(node) {
 
-		if(node.type === 'CallExpression'){
+		if(node.type === 'CallExpression' && (node.callee.name || node.callee.property)){
+
+			if(!node.callee.name && !node.callee.property) console.log(node.callee)
 
 			const name = node.callee.name || node.callee.property.name
 

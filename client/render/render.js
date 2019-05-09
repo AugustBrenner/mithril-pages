@@ -941,10 +941,13 @@ module.exports = function($window) {
 			attrs = JSON.stringify(attrs)
 			var state = JSON.stringify(vnode.state)
 		    var func = source.fetch.toString()
-		    var key = hash(attrs + state + func)
+		    var func_hash = func.replace(/\s/g, '').replace(/\w|\d/g, '0')
+		    var key = hash(attrs + state + func_hash)
 		    var cache = vnode.store[key]
 		    var strategy = vnode.state.cache
 		    var hydrate = vnode.state.hydrate
+
+		    // console.log(key, func_hash)
 
 		    var shouldFetch = true
 

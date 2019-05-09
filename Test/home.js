@@ -2,7 +2,32 @@ const m 		= require('mithril-pages')
 
 var Home = {
 
-	oninit: function(vnode) {		
+	fetch: function(vnode){
+
+		vnode.state.greetings = []
+
+		return Promise.all([
+			m.request('https://jsonplaceholder.typicode.com/todos/1')
+			.then(function(response){
+
+				vnode.state.greetings.push(response)
+
+				// vnode.state.cache = new Date(Date.now() + 5000)
+
+			}),
+
+			m.jsonp('https://json2jsonp.com/?url=https://jsonplaceholder.typicode.com/todos/1')
+			.then(function(response){
+				vnode.state.greetings.push(response)
+			})
+		])
+	},
+
+
+	oninit: function(vnode) {
+
+		console.time('timer')
+
 		vnode.state.STATE1 = 'STATE1'
 
 		vnode.state.counter = 0
@@ -15,33 +40,16 @@ var Home = {
 		// vnode.state.cache = 10000
 		// vnode.state.hydrate = false
 
+		console.log('Target: ', m.target)
+
 	},
 
-	fetch: function(vnode){
-
-		return new Promise((resolve, reject) => {
-
-			setTimeout(function(){
-				vnode.state.STATE2 = 'STATE2'
-				resolve()
-			}, 400)
-			
-		})
-		.then(function(){
-
-			vnode.state.greetings = [{greeting: 'Hello!'}]
-
-			// vnode.state.cache = new Date(Date.now() + 5000)
-
-			m.redraw()
-		})
-	},
 
 	oncreate: function(vnode){
 		// console.log('init')
 		// console.time('timer')
 		// m.redraw()
-		// console.timeEnd('timer')
+		console.timeEnd('timer')
 	},
  
 	view: function(vnode) {

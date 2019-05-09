@@ -1,22 +1,7 @@
 const m 		= require('mithril-pages')
 
 var Async = {
-
-	oninit: function(vnode) {		
-		vnode.state.STATE5 = 'STATE5'
-
-		vnode.state.counter = 0
-
-		vnode.state.increment = function(){
-			vnode.state.counter++
-		}
-
-		// vnode.state.cache = false
-		// vnode.state.cache = 5000
-		// vnode.state.hydrate = false
-
-	},
-
+	
 	fetch: function(vnode){
 
 		return new Promise((resolve, reject) => {
@@ -36,6 +21,22 @@ var Async = {
 			m.redraw()
 		})
 	},
+
+	oninit: function(vnode) {		
+		vnode.state.STATE5 = 'STATE5'
+
+		vnode.state.counter = 0
+
+		vnode.state.increment = function(){
+			vnode.state.counter++
+		}
+
+		// vnode.state.cache = false
+		// vnode.state.cache = 5000
+		// vnode.state.hydrate = false
+
+	},
+
 
 	oncreate: function(vnode){
 		// console.log('init')

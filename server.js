@@ -1,28 +1,14 @@
-// var http = require('http')
 
-// var pages = require('./index.js')
-
-// var app = pages.init('./Test/routes.js')
-
-// http.createServer(function (req, res) {
-
-// 	pages.render(req.url, app).then(function(page){
-
-
-// 		res.writeHead(200, {'Content-Type': 'text/html'})
-// 		res.end(page)
-// 	})
-
-
-// }).listen(3000)
-
-const express = require('express')
+const express 			= require('express')
+const compression 		= require('compression')
 
 const server = express()
 
-const pages = require('./index.js')
+server.use(compression())
 
-const app = pages.init('./Test/routes.js')
+const pages = require('./index.js')
+console.log(process.env.NODE_ENV)
+const app = pages.init('./Test/routes.js', {production: process.env.NODE_ENV === 'production'})
 
 server.use(app)
 

@@ -42,6 +42,11 @@ m.lazy.setRedraw(m.redraw)
 //=======
 //>>>>>>>
 
+Object.defineProperty(m, "target", {
+    value: "client",
+    writable: false
+})
+
 
 
 

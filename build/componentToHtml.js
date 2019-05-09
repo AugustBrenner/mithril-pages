@@ -125,8 +125,11 @@ async function setHooks (component, vnode, hooks) {
     var attrs = JSON.stringify(vnode.attrs)
     var state = JSON.stringify(vnode.state)
     var func = component.fetch.toString()
+    var func_hash = func.replace(/\s/g, '').replace(/\w|\d/g, '0')
 
-    var key = hash(attrs + state + func)
+    var key = hash(attrs + state + func_hash)
+
+    // console.log(key, func_hash)
 
     await (component.fetch.call(vnode.state, vnode) || async function () {})
 

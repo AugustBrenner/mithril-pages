@@ -113,55 +113,94 @@ const render = args => (req, res) => {
 
 const m = {}
 
-m.init = function(pathname){
+m.init = function(pathname, options){
+
+	options = options || {}
 	
 	const path_object = resolveFile(pathname)
 
-	const args = {}
+console.log(options)
 
-	const server_config = getWebpackConfigServer(path_object.filepath, path_object.dirpath)
+	// Server config
+	const server_config = getWebpackConfigServer(path_object.filepath, path_object.dirpath, options.production)
 
 	const compiler_server = webpack(server_config)
 
 	compiler_server.outputFileSystem = fileSystem
 
-	compiler_server.watch({ 
-	    aggregateTimeout: 300,
-	}, (error, stats) => {
-
-		console.log('\n\n', stats.toString({colors: true}))
-
-		const assetsByChunkName = stats.toJson().assetsByChunkName
-		const outputPath = stats.toJson().outputPath
-
-
-		var scripts = normalizeAssets(assetsByChunkName.main)
-			.filter((path) => path.endsWith('.js'))
-			.map((path) => fileSystem.readFileSync(outputPath + '/' + path))
-			.join('\n')
-
-		args.routes = requireFromString(scripts)
-
-	})
+	const args = {}
 
 
 
+	// Client config
+	const client_config = getWebpackConfigClient(path_object.filepath, path_object.dirpath, options.production)
 
-	const client_config = getWebpackConfigClient(path_object.filepath, path_object.dirpath)
+	console.log(JSON.stringify(client_config, null, 2))
 
 	const compiler_client = webpack(client_config)
 
-	const devmMiddleware = webpackDevMiddleware(compiler_client, {
+	const devMiddleware = webpackDevMiddleware(compiler_client, {
 	    serverSideRender: true,
 	})
-
-	const hotMiddleware = webapckHotMiddleware(compiler_client)
-
+	
 
 
+	if(options.production === true){
+
+		compiler_server.run((error, stats) => {
+
+			console.log('\n\n', stats.toString({colors: true}))
+
+			const assetsByChunkName = stats.toJson().assetsByChunkName
+			const outputPath = stats.toJson().outputPath
 
 
-	return [ devmMiddleware, hotMiddleware, render(args) ]
+			var scripts = normalizeAssets(assetsByChunkName.main)
+				.filter((path) => path.endsWith('.js'))
+				.map((path) => fileSystem.readFileSync(outputPath + '/' + path))
+				.join('\n')
+
+			args.routes = requireFromString(scripts)
+
+		})
+
+		return [ devMiddleware, render(args) ]
+
+	}
+	else {
+
+
+		// Build Server
+		compiler_server.watch({ 
+		    aggregateTimeout: 300,
+		}, (error, stats) => {
+
+			console.log('\n\n', stats.toString({colors: true}))
+
+			const assetsByChunkName = stats.toJson().assetsByChunkName
+			const outputPath = stats.toJson().outputPath
+
+
+			var scripts = normalizeAssets(assetsByChunkName.main)
+				.filter((path) => path.endsWith('.js'))
+				.map((path) => fileSystem.readFileSync(outputPath + '/' + path))
+				.join('\n')
+
+			args.routes = requireFromString(scripts)
+
+		})
+
+
+
+		// Build Client
+
+		const hotMiddleware = webapckHotMiddleware(compiler_client)
+
+
+
+		return [ devMiddleware, hotMiddleware, render(args) ]
+
+	}
 }
 
 
