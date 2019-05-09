@@ -15,7 +15,7 @@ var redrawService = require("./redraw")
 
 requestService.setCompletionCallback(redrawService.redraw)
 
-m.mount = require("./mount")
+// m.mount = require("./mount")
 m.route = require("./route")
 m.render = require("./render").render
 m.redraw = redrawService.redraw

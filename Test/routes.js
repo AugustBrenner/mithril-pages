@@ -35,6 +35,7 @@ var Page2 = {
 		
 	view: function(vnode) {
 		// console.log('page', vnode.store)
+		// return m('div', m.scripts)
 		return [
 			m('head', [
 				m('title', 'Page 2'),
