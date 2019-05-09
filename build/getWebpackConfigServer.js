@@ -92,7 +92,11 @@ module.exports = function(pathname, dirname, production){
 
 	var prod = {
 		mode: 'production',
-		devtool: 'sourcemap',
+		optimization: {
+			namedModules: true,
+			namedChunks: true
+		},
+		devtool: 'source-map',
 	}
 
 

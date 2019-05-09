@@ -57,12 +57,13 @@ var lazy = {
 
 
 
-		// var has_loaded = window["webpackJsonpapp"].reduce((loaded, bundle) => {
-		// 	return loaded || bundle[0][0] === key
-		// }, null)
+		var has_loaded = window["webpackJsonpapp"].reduce((loaded, bundle) => {
+			console.log(bundle)
+			return loaded || bundle[0][0] === key
+		}, null)
 
 
-		// if(has_loaded) component.resolved = true
+		if(has_loaded) component.resolved = true
 
 
 		setTimeout(function(){
@@ -85,7 +86,7 @@ var lazy = {
 			
 			var component = lazy.components[key]
 
-			if(!component.component) promises.push(component.resolve())
+			if(component.resolved && !component.component) promises.push(component.resolve())
 
 		})
 

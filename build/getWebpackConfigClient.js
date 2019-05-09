@@ -138,6 +138,10 @@ module.exports = function(pathname, dirname, production){
 				}
 			]
 		},
+		optimization: {
+			namedModules: true,
+			namedChunks: true
+		},
 	    devtool: false,
 	}
 

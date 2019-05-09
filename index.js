@@ -42,6 +42,8 @@ function isObject(obj){
 
 const render = args => (req, res) => {
 
+	console.time('Time')
+
 	const assetsByChunkName = res.locals.webpackStats.toJson().assetsByChunkName
 	const filesystem = res.locals.fs
 	const outputPath = res.locals.webpackStats.toJson().outputPath
@@ -54,7 +56,7 @@ const render = args => (req, res) => {
 
 	var scripts = normalizeAssets(assetsByChunkName.main)
 		.filter((path) => path.endsWith('.js'))
-		.map((path) => `<script class= "__mithril_pages_scripts__" src="${path}"></script>`)
+		.map((path) => `<script class= "__mithril_pages_scripts__" src="${path}" defer></script>`)
 		.join('\n')
 
 	var req_url = req.url
@@ -93,14 +95,14 @@ const render = args => (req, res) => {
 			return assetsByChunkName[hash]
 		})
 
-		scripts = bundles.map(path => `<script class= "__mithril_pages_scripts__" src="${path}"></script>`).join('\n') + scripts
+		scripts = bundles.map(path => `<script class= "__mithril_pages_scripts__" src="${path}" defer></script>`).join('\n') + scripts
 
 		scripts = `<script>window.__mithril_pages_store__ = ${JSON.stringify(store)}</script>` + scripts
 
 		view = view.replace(/__mithril_pages_styles__/, `<style class="__mithril_pages_styles__">${styles}</style>`)
 		view = view.replace(/__mithril_pages_scripts__/, scripts)
 		// view = view.replace(/__mithril_pages_store__/, JSON.stringify(store))
-
+console.timeEnd('Time')
 		res.send(view)
 	})
 	.catch(console.error)
@@ -142,7 +144,6 @@ console.log(options)
 	const devMiddleware = webpackDevMiddleware(compiler_client, {
 	    serverSideRender: true,
 	})
-	
 
 
 	if(options.production === true){

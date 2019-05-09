@@ -4,21 +4,13 @@ var Async = {
 	
 	fetch: function(vnode){
 
-		return new Promise((resolve, reject) => {
+		return m.request('https://jsonplaceholder.typicode.com/todos/1')
+		.then(function(response){
 
-			setTimeout(function(){
-				vnode.state.STATE6 = 'STATE6'
-				resolve()
-			}, 400)
-			
-		})
-		.then(function(){
-
-			vnode.state.gre = [{gre: 'HYE!'}]
+			vnode.state.gre = response
 
 			// vnode.state.cache = new Date(Date.now() + 5000)
 
-			m.redraw()
 		})
 	},
 
