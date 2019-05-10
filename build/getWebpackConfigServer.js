@@ -16,7 +16,7 @@ module.exports = function(pathname, dirname, production){
 	        libraryTarget: 'umd'
 	    },
 	    target: 'node',
-   		externals: [nodeExternals()],
+   		externals: [nodeExternals({whitelist:['mithril-pages']})],
 	    node: {
 			fs: 'empty',
 			net: 'empty',
@@ -26,7 +26,7 @@ module.exports = function(pathname, dirname, production){
 		resolve: {
 			alias: {
 				'mithril-pages': path.resolve(__dirname, '../server/index.js')
-			}
+			},
 		},
 		module: {
 			rules: [

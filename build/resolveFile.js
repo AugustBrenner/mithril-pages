@@ -62,14 +62,19 @@ function getRootDir(caller_dir_path){
 
 
 
-module.exports = function(pathname){
+module.exports = function(pathname, options){
 
-if(path.isAbsolute(pathname)) return pathname
+	return Promise.resolve().then(function(){
 
-	var caller_dir_path = path.dirname(getCallerFile())
+		if(path.isAbsolute(pathname)) return pathname
 
-	return {
-		filepath: path.resolve(caller_dir_path, pathname),
-		dirpath: caller_dir_path,
-	}
+		var caller_dir_path = path.dirname(getCallerFile())
+
+		return {
+			filepath: path.resolve(caller_dir_path, pathname),
+			dirpath: caller_dir_path,
+			options: options,
+		}
+
+	})
 }

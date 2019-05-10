@@ -24,6 +24,69 @@ const fileSystem 				= new MemoryFileSystem()
 
 
 
+
+function getCallerFile() {
+
+	var origPrepareStackTrace = Error.prepareStackTrace
+
+    try {
+
+    	Error.prepareStackTrace = function (_, stack) { return stack }
+        
+        var error = new Error()
+
+        var stack = error.stack
+
+        Error.prepareStackTrace = origPrepareStackTrace
+
+        var currentfile = stack.shift().getFileName()
+
+        var callerfile
+
+        while (stack.length) {
+            
+            callerfile = stack.shift().getFileName()
+
+            if(currentfile !== callerfile) return callerfile
+        }
+    }
+    catch (err) {}
+    return undefined;
+}
+
+
+
+function getRootDir(caller_dir_path){
+
+	var path_array = caller_dir_path.split(path.sep)
+
+	var root_dir
+
+	while(path_array.length > 0){
+
+		var current_dir = path_array.join(path.sep)
+
+		var files_in_dir = fs.readdirSync(current_dir)
+
+		if(files_in_dir.indexOf('package.json') > -1 || files_in_dir.indexOf('node_modules') > -1){
+
+			root_dir = current_dir
+
+			break
+		}
+
+		path_array.pop()
+	}
+
+	if(!root_dir) throw 'Root directory not found.'
+
+	return root_dir
+
+}
+
+
+
+
 // This function makes server rendering of asset references consistent with different webpack chunk/entry configurations
 function normalizeAssets(assets) {
   if (isObject(assets)) {
@@ -119,12 +182,20 @@ m.init = function(pathname, options){
 
 	options = options || {}
 	
-	const path_object = resolveFile(pathname)
+	// resolveFile(pathname)
 
-console.log(options)
+	if(path.isAbsolute(pathname)){
+		var filepath = pathname
+		var dirpath = path.dirname(pathname)
+	}
+	else{
+		var caller_dir_path = path.dirname(getCallerFile())
+		var filepath = path.resolve(caller_dir_path, pathname)
+		var dirpath = path.dirname(filepath)
+	}
 
 	// Server config
-	const server_config = getWebpackConfigServer(path_object.filepath, path_object.dirpath, options.production)
+	const server_config = getWebpackConfigServer(filepath, dirpath, options.production)
 
 	const compiler_server = webpack(server_config)
 
@@ -135,9 +206,9 @@ console.log(options)
 
 
 	// Client config
-	const client_config = getWebpackConfigClient(path_object.filepath, path_object.dirpath, options.production)
+	const client_config = getWebpackConfigClient(filepath, dirpath, options.production)
 
-	console.log(JSON.stringify(client_config, null, 2))
+	// console.log(JSON.stringify(client_config, null, 2))
 
 	const compiler_client = webpack(client_config)
 
