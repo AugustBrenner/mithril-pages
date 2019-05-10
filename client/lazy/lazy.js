@@ -27,14 +27,14 @@ var lazy = {
 			placeholder: placeholder || {view: function(vnode) { console.log('DEFAULT PLACEHOLDER'); return [m('head'), m('body')]}},
 			error: undefined || {view: function(vnode) {return [m('head'), m('body', 'Error')]}},
 			options: options,
-			key: key,
-			resolving: false, 
+			key: key, 
 			name: name,
 			resolve: function(should_redraw, attempt){
 
 				var comp = lazy.components[key]
 				
 				attempt = attempt || 1
+				console.log('RESOVLE', attempt, comp.key)
 
 				if(attempt >= 10){
 					comp.resolving = false
@@ -42,15 +42,14 @@ var lazy = {
 				}
 
 				if(comp.resolved && comp.component) return Promise.resolve(comp.component)
-				else if(comp.resolving) return Promise.resolve(comp.placeholder)
-
-				comp.resolving = true
 
 				if(document.head){
 					try{
+						console.log("FETCH")
 						return comp.promise()
 						.then(component => {
 							comp.component = component
+							comp.resolved = true
 							return component
 						})
 						.catch(error => {
@@ -58,18 +57,17 @@ var lazy = {
 							return comp.error
 						})
 						.finally(function(){
-							comp.resolved = true
-							comp.resolving = false
-
 							if(!should_redraw) return
-								
+
 							setTimeout(function(){
 								lazy.config.redraw()
 							},0)
 						})
 					}
 					catch(e){
+						console.log('ERROR', e)
 						comp.component = comp.error
+						comp.resolved = true
 						return Promise.resolve(comp.error)
 					}
 				}
