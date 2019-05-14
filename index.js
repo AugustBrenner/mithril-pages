@@ -136,7 +136,9 @@ const render = args => (req, res) => {
 	}
 
 
-	const store = {}
+	const store = {__pages:{}, __components:{}}
+
+	store.__pages[req_url] = {}
 
 	const component = route(req_url, args.routes)
 
@@ -146,6 +148,14 @@ const render = args => (req, res) => {
 		var hashes = store.__hashes || []
 		store.__hashes = undefined
 		delete store.__hashes
+
+		var page = store.__pages || {}
+
+		console.log(JSON.stringify(store, null, 2))
+		// store.__page = undefined
+		// delete store.__page
+
+		console.log(store)
 
 		const data_path = route.buildDataPath(req_url)
 		Object.keys(store).forEach(key => {

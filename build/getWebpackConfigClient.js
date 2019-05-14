@@ -22,6 +22,29 @@ module.exports = function(pathname, dirname, production){
 		},
 		module: {
 			rules: [
+				// {
+				// 	test: /\.style.js$/,
+				// 	exclude: /(node_modules|bower_components|client|mithril)/,
+				// 	use: [
+				// 		'style-loader',
+				// 		{
+				// 			loader: 'css-loader',
+				// 			options: {
+				// 				importLoaders: 2
+				// 			}
+				// 		},
+				// 		{
+				// 			loader: 'postcss-loader',
+				// 			options: {
+				// 				parser: 'postcss-js',
+				// 				plugins: [
+				// 					require('autoprefixer')({}),
+				// 				]
+				// 			},
+				// 		},
+				// 		'babel-loader'
+				// 	]
+				// },
 		        { 
 		            include: [
           				path.resolve(__dirname, 'bundle-bridge-client.js')

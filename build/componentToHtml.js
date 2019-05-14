@@ -286,6 +286,7 @@ async function _render (view, options, hooks) {
       vnode.state = omit(component, COMPONENT_PROPS)
       //<<<<<<< Modified: Added global store
       vnode.store = options.store
+      vnode.page = options.store.__pages[options.path]
       //=======
       //>>>>>>>
       vnode.attrs = component.attrs || view.attrs || {}

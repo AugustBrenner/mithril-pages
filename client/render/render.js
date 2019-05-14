@@ -30,6 +30,8 @@ module.exports = function($window) {
 		for(var i = 0; i < children.length; i++){
 			if(!children[i]) continue
 			children[i].store = store
+			children[i].page = store ? store.__page : undefined
+
 		}
 	}
 

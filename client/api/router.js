@@ -45,10 +45,17 @@ module.exports = function($window, redrawService) {
 			else throw new Error("Could not resolve default route " + defaultRoute)
 		}
 		routeService.defineRoutes(routes, function(payload, params, path, route) {
+
 			//<<<<<<< Modified: Added Lazy route loading
 			var update = lastUpdate = function(routeResolver, comp) {
 				if (update !== lastUpdate) return
-				component = comp != null && (typeof comp.view === "function" || typeof comp === "function")? comp : "div"
+
+				var key = path.split('#')[0]
+				console.log(JSON.stringify(storeObject, null, 2), key)
+				if(!storeObject.__pages[key]) storeObject.__pages[key] = {}
+				storeObject.__page = storeObject.__pages[key]
+
+				component = comp != null && (typeof comp.view === "function" || typeof comp === "function") ? comp : "div"
 				attrs = params, currentPath = path, lastUpdate = null
 				render = (routeResolver.render || identity).bind(routeResolver)
 				redraw()
