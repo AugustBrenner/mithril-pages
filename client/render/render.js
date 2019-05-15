@@ -945,7 +945,7 @@ module.exports = function($window) {
 		    var func = source.fetch.toString()
 		    var func_hash = func.replace(/\s/g, '').replace(/\w|\d/g, '0')
 		    var key = hash(attrs + state + func_hash)
-		    var cache = vnode.store[key]
+		    var cache = vnode.store.__components[key]
 		    var strategy = vnode.state.cache
 		    var hydrate = vnode.state.hydrate
 
@@ -955,7 +955,7 @@ module.exports = function($window) {
 
 		    if(!cache) cache = {}
 		    if(!cache.createdAt) cache.createdAt = Date.now()
-		    if(!cache.path) cache.path = routeService.buildDataPath()
+		    if(!cache.path) cache.path = routeService.buildPath()
 		    if(strategy === false) cache.expiresAt = 0
 		    if(strategy === true || strategy === null || strategy === undefined) cache.expiresAt = Infinity
 		    if(typeof strategy === 'number') cache.expiresAt = cache.createdAt + strategy
@@ -985,7 +985,7 @@ module.exports = function($window) {
 		    }
 		    else if(cache.state){
 		    	console.log('Expire Cache')
-		    	delete vnode.store[key]
+		    	delete vnode.store.__components[key]
 		    }
 
 		    if(shouldFetch){
@@ -997,9 +997,10 @@ module.exports = function($window) {
 		    	Object.assign(vnode.state, cache.state)
 		    }
 		    cache.state = vnode.state
-		    vnode.store[key] = cache
-		    if(!vnode.store[cache.path]) vnode.store[cache.path] = {}
-		    vnode.store[cache.path][key] = cache.expiresAt
+		    vnode.store.__components[key] = cache
+		    if(!vnode.store.__pages[cache.path]) vnode.store.__pages[cache.path] = {__components: {}}
+		    if(!vnode.store.__pages[cache.path].__components) vnode.store.__pages[cache.path].__components = {}
+		    vnode.store.__pages[cache.path].__components[key] = cache.expiresAt
 
 		}
 		//=======

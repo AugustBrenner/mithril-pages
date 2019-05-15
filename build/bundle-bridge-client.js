@@ -20,6 +20,9 @@ m.styles = m.trust(
 console.time('timere')
 m.lazy.resolveAvailable().then(function(){
 	console.timeEnd('timere')
+	var store = window.__mithril_pages_store__
+	if(!store.__components) store.__components = {}
+	if(!store.__pages) store.__pages = {}
 	m.route(document.documentElement, '/', routes, window.__mithril_pages_store__)
 })
 

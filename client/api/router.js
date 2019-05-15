@@ -19,7 +19,6 @@ module.exports = function($window, redrawService) {
 	//<<<<<<< Modified: Added store to route parameters
 	var route = function(root, defaultRoute, routes, store) {
 		routesObject = routes
-		if(!store) store = {}
 		storeObject = store
 		if(typeof store !== "object") throw new Error("Ensure the store argument is type 'object'.")
 
@@ -151,28 +150,31 @@ module.exports = function($window, redrawService) {
 
 				if(should_fetch_state){
 
-					var data_path = routeService.buildDataPath(path)
+					var cache_path = routeService.buildPath(path)
 
-					var pathsObject = storeObject[data_path] || {}
+					var pageObject = storeObject.__pages[cache_path] || {__components:{}}
 
 					var expired = false
 
-					var data_paths = Object.keys(pathsObject)
+					var component_keys = Object.keys(pageObject.__components)
 
-					if(data_paths.length === 0){
+					if(component_keys.length === 0){
 						expired = true
 					}
 					else{
-						data_paths.forEach(function(path){
-							if(pathsObject[path] < Date.now()) expired = true
+						component_keys.forEach(function(path){
+							if(pageObject[path] < Date.now()) expired = true
 						})
 					}
 
 					if(expired){
+						var data_path = routeService.buildDataPath(cache_path)
 						request(data_path).then(function(data){
 
-							Object.keys(data).forEach(function(key){
-								var cache = data[key]
+							console.log(JSON.stringify(data, null, 2))
+
+							Object.keys(data.__components).forEach(function(key){
+								var cache = data.__components[key]
 								cache.createdAt = Date.now()
 								try{
 									cache.state = JSON.parse(cache.state)
@@ -187,11 +189,12 @@ module.exports = function($window, redrawService) {
 							    if(strategy === true || strategy === null || strategy === undefined) cache.expiresAt = Infinity
 							    if(typeof strategy === 'number') cache.expiresAt = cache.createdAt + strategy
 							    if(typeof strategy === 'string' || strategy instanceof Date) cache.expiresAt = new Date(strategy).getTime()
-								storeObject[key] = cache
 
-								if(!storeObject[cache.path]) storeObject[cache.path] = {}
+								storeObject.__components[key] = cache
 
-								storeObject[cache.path][key] = cache.expiresAt
+								if(!storeObject.__page[cache.path]) storeObject.__page[cache.path] = {__components:{}}
+
+								storeObject.__page[cache.path].__components[key] = cache.expiresAt
 							})
 						})
 						.catch(console.log)

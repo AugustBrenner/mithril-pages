@@ -48,6 +48,20 @@ module.exports = function($window) {
 		return path.slice(0, pathEnd)
 	}
 
+	router.buildPath = function(path){
+
+		if(!path) path = $window.location.pathname + $window.location.search
+
+		var queryData = {}
+
+		var data_path = router.parsePath(path, queryData, {})
+
+		var query = buildQueryString(queryData)
+		if (query) data_path += "?" + query
+
+		return data_path
+	}
+
 	router.buildDataPath = function(path){
 
 		if(!path) path = $window.location.pathname + $window.location.search

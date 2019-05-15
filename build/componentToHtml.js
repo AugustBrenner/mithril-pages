@@ -133,7 +133,7 @@ async function setHooks (component, vnode, hooks) {
 
     await (component.fetch.call(vnode.state, vnode) || async function () {})
 
-    vnode.store[key] = JSON.stringify(vnode.state)
+    vnode.store.__components[key] = JSON.stringify(vnode.state)
 
   }
   //=======
@@ -272,6 +272,11 @@ async function _render (view, options, hooks) {
   // component
   if (view.view || view.tag) {
     const vnode = { children: [].concat(view.children) }
+    //<<<<<<< Modified: Added global store
+    vnode.store = options.store
+    vnode.page = options.store.__pages[options.path]
+    //=======
+    //>>>>>>>
     let component = view.view
     if (isObject(view.tag)) {
       component = view.tag
@@ -284,11 +289,6 @@ async function _render (view, options, hooks) {
     if (component) {
       vnode.tag = copy(component)
       vnode.state = omit(component, COMPONENT_PROPS)
-      //<<<<<<< Modified: Added global store
-      vnode.store = options.store
-      vnode.page = options.store.__pages[options.path]
-      //=======
-      //>>>>>>>
       vnode.attrs = component.attrs || view.attrs || {}
 
       await setHooks(component, vnode, hooks)

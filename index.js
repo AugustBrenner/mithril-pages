@@ -127,6 +127,8 @@ const render = args => (req, res) => {
 	var fetch_data_only = false
 
 	if(/\.json$/.test(req.url)){
+
+		console.log('URL', req.url)
 		
 		req_url = req_url.replace(/^\/__index__/, '/')
 
@@ -143,7 +145,7 @@ const render = args => (req, res) => {
 	const component = route(req_url, args.routes)
 
 
-	componentToHtml(component.component, component.params, {store: store, path: req.url, data_only: fetch_data_only}).then(view => {
+	componentToHtml(component.component, component.params, {store: store, path: req_url, data_only: fetch_data_only}).then(view => {
 
 		var hashes = store.__hashes || []
 		store.__hashes = undefined
@@ -155,11 +157,8 @@ const render = args => (req, res) => {
 		// store.__page = undefined
 		// delete store.__page
 
-		console.log(store)
-
-		const data_path = route.buildDataPath(req_url)
-		Object.keys(store).forEach(key => {
-			store[key] = {path: data_path, state: store[key]}
+		Object.keys(store.__components).forEach(key => {
+			store.__components[key] = {path: req_url, state: store.__components[key]}
 		})
 
 		if(fetch_data_only) return res.json(store)
