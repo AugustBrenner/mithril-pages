@@ -50,7 +50,6 @@ module.exports = function($window, redrawService) {
 				if (update !== lastUpdate) return
 
 				var key = path.split('#')[0]
-				console.log(JSON.stringify(storeObject, null, 2), key)
 				if(!storeObject.__pages[key]) storeObject.__pages[key] = {}
 				storeObject.__page = storeObject.__pages[key]
 
@@ -170,8 +169,6 @@ module.exports = function($window, redrawService) {
 					if(expired){
 						var data_path = routeService.buildDataPath(cache_path)
 						request(data_path).then(function(data){
-
-							console.log(JSON.stringify(data, null, 2))
 
 							Object.keys(data.__components).forEach(function(key){
 								var cache = data.__components[key]

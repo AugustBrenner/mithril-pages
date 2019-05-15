@@ -151,11 +151,10 @@ const render = args => (req, res) => {
 		store.__hashes = undefined
 		delete store.__hashes
 
-		var page = store.__pages || {}
 
 		console.log(JSON.stringify(store, null, 2))
-		// store.__page = undefined
-		// delete store.__page
+		store.__pages = undefined
+		delete store.__pages
 
 		Object.keys(store.__components).forEach(key => {
 			store.__components[key] = {path: req_url, state: store.__components[key]}
