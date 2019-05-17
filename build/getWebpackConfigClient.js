@@ -2,8 +2,9 @@ const path = require('path')
 const crypto = require('crypto')
 const webpack = require('webpack')
 const merge = require('webpack-merge')
+const HardSourceWebpackPlugin = require('hard-source-webpack-plugin')
 
-
+console.log(process.cwd())
 module.exports = function(pathname, dirname, production){
 
 	var common = {
@@ -132,6 +133,14 @@ module.exports = function(pathname, dirname, production){
 		},
 		plugins: [
     		new webpack.HotModuleReplacementPlugin(),
+    		new HardSourceWebpackPlugin({
+				cacheDirectory: path.resolve(process.cwd(), './.cache/client/'),
+				environmentHash: {
+				    root: process.cwd(),
+				    directories: [],
+				    files: ['package-lock.json', 'yarn.lock'],
+				},
+			}),
 		],
 		devtool: 'inline-source-map',
 	}

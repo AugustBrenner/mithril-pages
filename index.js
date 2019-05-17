@@ -222,6 +222,10 @@ m.init = function(pathname, options){
 
 	const devMiddleware = webpackDevMiddleware(compiler_client, {
 	    serverSideRender: true,
+	    // stats: "verbose",
+	    watchOptions: {
+			// ignored: [path.resolve(__dirname, './**/*')]
+		}
 	})
 
 
@@ -253,6 +257,9 @@ m.init = function(pathname, options){
 		// Build Server
 		compiler_server.watch({ 
 		    aggregateTimeout: 300,
+		    watchOptions: {
+				// ignored: ['./**/*']
+			}
 		}, (error, stats) => {
 
 			console.log('\n\n', stats.toString({colors: true}))

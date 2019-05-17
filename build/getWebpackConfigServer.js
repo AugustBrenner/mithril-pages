@@ -3,6 +3,7 @@ const crypto = require('crypto')
 const webpack = require('webpack')
 const merge = require('webpack-merge')
 const nodeExternals = require('webpack-node-externals')
+const HardSourceWebpackPlugin = require('hard-source-webpack-plugin')
 
 
 module.exports = function(pathname, dirname, production){
@@ -111,6 +112,16 @@ module.exports = function(pathname, dirname, production){
 				},
 			]
 		},
+		plugins: [
+			new HardSourceWebpackPlugin({
+				cacheDirectory: path.resolve(process.cwd(), './.cache/server/'),
+				environmentHash: {
+				    root: process.cwd(),
+				    directories: [],
+				    files: ['package-lock.json', 'yarn.lock'],
+				},
+			})
+		],
 	}
 
 

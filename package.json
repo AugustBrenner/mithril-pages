@@ -19,6 +19,7 @@
     "escodegen": "^1.11.1",
     "esprima": "^4.0.1",
     "express": "^4.16.4",
+    "hard-source-webpack-plugin": "^0.13.1",
     "loader-utils": "^1.2.3",
     "node-sass": "^4.12.0",
     "postcss-loader": "^3.0.0",
