@@ -296,6 +296,8 @@ async function _render (view, options, hooks) {
     }
   }
 
+  if(!view.tag) throw new Error('Node must not be a function reference.\n\n' + view.toString())
+
   if (view.tag === '<') {
     return '' + view.children
   }

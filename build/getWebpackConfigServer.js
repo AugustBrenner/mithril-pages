@@ -28,31 +28,11 @@ module.exports = function(pathname, dirname, production){
 				'mithril-pages': path.resolve(__dirname, '../server/index.js')
 			},
 		},
+		resolveLoader: {
+		    modules: [path.resolve(__dirname, '../node_modules')],
+		},
 		module: {
 			rules: [
-				// {
-				// 	test: /\.style.js$/,
-				// 	exclude: /(node_modules|bower_components|client|mithril)/,
-				// 	use: [
-				// 		'style-loader',
-				// 		{
-				// 			loader: 'css-loader',
-				// 			options: {
-				// 				importLoaders: 2
-				// 			}
-				// 		},
-				// 		{
-				// 			loader: 'postcss-loader',
-				// 			options: {
-				// 				parser: 'postcss-js',
-				// 				plugins: [
-				// 					require('autoprefixer')({}),
-				// 				]
-				// 			},
-				// 		},
-				// 		'babel-loader'
-				// 	]
-				// },
 		        {
 					test: /\.js$/,
 					exclude: /(node_modules|bower_components)/,
@@ -100,6 +80,37 @@ module.exports = function(pathname, dirname, production){
 	var dev = {
 		mode: 'development',
 		devtool: 'inline-source-map',
+		module: {
+			rules: [
+				{
+					test: /\.(sa|sc|c)ss$/,
+					exclude: /(node_modules|bower_components|client|mithril)/,
+					use: [
+						{
+							loader: 'css-loader',
+							options: {
+								importLoaders: 1,
+								sourceMap: true,
+								modules: true,
+								localIdentName: '[local]-[hash:base64:5]',
+							}
+						},
+						{
+							loader: 'resolve-url-loader',
+							options: {
+								sourceMap: true,
+							}
+						},
+    					{
+    						loader: 'sass-loader',
+    						options: {
+    							sourceMap: true
+    						}
+    					},
+					]
+				},
+			]
+		},
 	}
 
 
@@ -112,6 +123,48 @@ module.exports = function(pathname, dirname, production){
 
 	var prod = {
 		mode: 'production',
+		module: {
+			rules: [
+				{
+					test: /\.(sa|sc|c)ss$/,
+					exclude: /(node_modules|bower_components|client|mithril)/,
+					use: [
+						{
+							loader: 'css-loader',
+							options: {
+								importLoaders: 1,
+								sourceMap: false,
+								modules: true,
+								localIdentName: '[hash:base64:5]',
+							}
+						},
+						{
+							loader: 'resolve-url-loader',
+							options: {
+								sourceMap: true,
+								engine: 'postcss',	
+							}
+						},
+						{
+							loader: 'postcss-loader',
+							options: {
+								sourceMap: true,
+								plugins: [
+									require('postcss-preset-env')(),
+									require('cssnano')()
+								]
+							},
+						},
+    					{
+    						loader: 'sass-loader',
+    						options: {
+    							sourceMap: true
+    						}
+    					},
+					]
+				},
+			]
+		},
 		optimization: {
 			namedModules: true,
 			namedChunks: true

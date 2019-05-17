@@ -50,8 +50,7 @@ module.exports = function($window, redrawService) {
 				if (update !== lastUpdate) return
 
 				var key = path.split('#')[0]
-				if(!storeObject.__pages[key]) storeObject.__pages[key] = {}
-				storeObject.__page = storeObject.__pages[key]
+				storeObject.__page = {}
 
 				component = comp != null && (typeof comp.view === "function" || typeof comp === "function") ? comp : "div"
 				attrs = params, currentPath = path, lastUpdate = null
@@ -151,7 +150,7 @@ module.exports = function($window, redrawService) {
 
 					var cache_path = routeService.buildPath(path)
 
-					var pageObject = storeObject.__pages[cache_path] || {__components:{}}
+					var pageObject = storeObject.__pages[cache_path] = storeObject.__pages[cache_path] || {__components:{}}
 
 					var expired = false
 

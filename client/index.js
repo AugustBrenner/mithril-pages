@@ -48,6 +48,54 @@ Object.defineProperty(m, "target", {
 })
 
 
+function Stylesheet(styleObject){
+
+	var self = this
+
+	var map = styleObject.locals
+
+	Object.keys(map).forEach(function(key){
+		self[key] = map[key]
+	})
+	self.__path = styleObject[0][0]
+	self.__ruleset = styleObject.toString()
+}
+
+Stylesheet.prototype.render = function(){
+	var self = this
+	return m({
+		view: function(vnode){
+			if(!vnode.page.__styles) vnode.page.__styles = {}
+			if(vnode.page.__styles[self.__path]){
+				return null
+			}
+			vnode.page.__styles[self.__path] = true
+			return m('style', {type:"text/css", key: self.__path}, self.__ruleset)
+		}
+	})
+}
+
+function Stylestore(){
+	var self = this
+	self.styles = {}
+
+	return function(styleObject){
+		
+		if(!styleObject) throw new Error('m.style() requires a properly formatted style object argument.')
+
+		var path = styleObject[0][0]
+
+		if(self.styles[path]) return self.styles[path]
+
+		var stylesheet = new Stylesheet(styleObject)
+
+		return stylesheet
+	}
+}
+
+m.styles = new Stylestore()
+
+
 
 
 module.exports = m

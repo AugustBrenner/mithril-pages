@@ -11,11 +11,6 @@ m.scripts = m.trust(
 		return elem.outerHTML
 	}).join('')
 )
-m.styles = m.trust(
-	Array.from(document.getElementsByClassName('__mithril_pages_styles__')).map(function(elem){
-		return elem.outerHTML
-	}).join('')
-)
 
 console.time('timere')
 m.lazy.resolveAvailable().then(function(){
