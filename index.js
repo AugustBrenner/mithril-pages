@@ -141,7 +141,7 @@ const render = args => (req, res) => {
 
 	let status = 200
 
-	const store = {__pages:{}, __components:{}}
+	let store = {__pages:{}, __components:{}}
 
 	store.__pages[req_url] = {}
 
@@ -150,8 +150,6 @@ const render = args => (req, res) => {
 	if(!component && args.routes.statusResponses['404']){
 
 		component = {component: args.routes.statusResponses['404'], params: {}}
-
-		status = 404
 	}
 
 	else if(!component) { 
@@ -160,41 +158,49 @@ const render = args => (req, res) => {
 
 
 
-	componentToHtml(component.component, component.params, {store: store, path: req_url, data_only: fetch_data_only}).then(response => {
-		let html = response.body
-		const headers = response.headers
+	function renderComponent(component, store){
+		return componentToHtml(component.component, component.params, {store: store, path: req_url, data_only: fetch_data_only}).then(response => {
+			let html = response.body
+			const headers = response.headers
 
-		var hashes = store.__hashes || []
-		store.__hashes = undefined
-		delete store.__hashes
+			if(headers.status) status = headers.status
+			delete headers.status
+
+			res.set(headers)
+
+			var hashes = store.__hashes || []
+			store.__hashes = undefined
+			delete store.__hashes
 
 
-		// console.log(JSON.stringify(store, null, 2))
-		store.__pages = undefined
-		delete store.__pages
+			// console.log(JSON.stringify(store, null, 2))
+			store.__pages = undefined
+			delete store.__pages
 
-		Object.keys(store.__components).forEach(key => {
-			store.__components[key] = {path: req_url, state: store.__components[key]}
+			Object.keys(store.__components).forEach(key => {
+				store.__components[key] = {path: req_url, state: store.__components[key]}
+			})
+
+			if(fetch_data_only) return res.json(store)
+			
+			var bundles = hashes.map(hash => {
+				return assetsByChunkName[hash]
+			})
+
+			scripts = bundles.map(path => `<script class= "__mithril_pages_scripts__" src="${path}" defer></script>`).join('\n') + scripts
+
+			scripts = `<script>window.__mithril_pages_store__ = ${JSON.stringify(store)}</script>` + scripts
+
+			html = html.replace(/__mithril_pages_styles__/, `<style class="__mithril_pages_styles__">${styles}</style>`)
+			html = html.replace(/__mithril_pages_scripts__/, scripts)
+			// html = html.replace(/__mithril_pages_store__/, JSON.stringify(store))
+
+			console.timeEnd('Time')
+
+			res.status(status).send(html)
 		})
-
-		if(fetch_data_only) return res.json(store)
-		
-		var bundles = hashes.map(hash => {
-			return assetsByChunkName[hash]
-		})
-
-		scripts = bundles.map(path => `<script class= "__mithril_pages_scripts__" src="${path}" defer></script>`).join('\n') + scripts
-
-		scripts = `<script>window.__mithril_pages_store__ = ${JSON.stringify(store)}</script>` + scripts
-
-		html = html.replace(/__mithril_pages_styles__/, `<style class="__mithril_pages_styles__">${styles}</style>`)
-		html = html.replace(/__mithril_pages_scripts__/, scripts)
-		// html = html.replace(/__mithril_pages_store__/, JSON.stringify(store))
-
-		console.timeEnd('Time')
-
-		res.status(status).send(html)
-	})
+	}
+	renderComponent(component, store)
 	.catch(error => {
 		const consumer = new sourceMap.SourceMapConsumer(args.sourcemap)
 
@@ -217,7 +223,17 @@ const render = args => (req, res) => {
 			return trace
 		})
 
+
+		if(fetch_data_only) return res.status(500).json({error: bundle_traces})
+		
 		console.log(bundle_traces, '\n', error)
+
+		store = {__pages:{}, __components:{}}
+
+		store.__pages[req_url] = {}
+
+		return renderComponent({component: args.routes.statusResponses['500'], params: {error: bundle_traces}}, store)
+
 	})
 
 

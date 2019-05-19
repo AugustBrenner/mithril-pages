@@ -204,10 +204,10 @@ function createAttrString (view, escapeAttributeValue) {
 
 async function createChildrenContent (view, options, hooks) {
   if (view.text != null) {
-    return {body: options.escapeString(view.text), headers: {}}
+    return {body: options.escapeString(view.text)}
   }
   if (isArray(view.children) && !view.children.length) {
-    return {body: '', headers: {}}
+    return {body: ''}
   }
   return _render(view.children, options, hooks)
 }
@@ -246,15 +246,15 @@ async function _render (view, options, hooks) {
   const type = typeof view
 
   if (type === 'string') {
-    return {body: view, headers: {}}
+    return {body: view}
   }
 
   if (type === 'number' || type === 'boolean') {
-    return {body: view, headers: {}}
+    return {body: view}
   }
 
   if (!view) {
-    return {body: '', headers: {}}
+    return {body: ''}
   }
 
   if (isArray(view)) {
@@ -264,7 +264,7 @@ async function _render (view, options, hooks) {
     for (const v of view) {
       let result = await _render(v, options, hooks)
       body += result.body
-      headers = Object.assign(headers, result.headers)
+      if(result.headers) headers = Object.assign(headers, result.headers)
     }
     return {body: body, headers: headers}
   }
@@ -299,9 +299,10 @@ async function _render (view, options, hooks) {
 
       const result = await _render(component.view.call(vnode.state, vnode), options, hooks)
       const headers = component.headers ? component.headers.call(vnode.state, vnode) : {}
+      if(result.headers) Object.assign(headers, result.headers)
       return {
         body: result.body,
-        headers: Object.assign(headers, result.headers)
+        headers: headers,
       }
     }
   }
@@ -309,11 +310,11 @@ async function _render (view, options, hooks) {
   if(!view.tag) throw new Error('Node must not be a function reference.\n\n' + view.toString())
 
   if (view.tag === '<') {
-    return {body: '' + view.children, headers: {}}
+    return {body: '' + view.children}
   }
   const children = await createChildrenContent(view, options, hooks)
   if (view.tag === '#') {
-    return {body: options.escapeString(children.body), headers: {}}
+    return {body: options.escapeString(children.body)}
   }
   if (view.tag === '[') {
     return {body: '' + children.body, headers: children.headers}
@@ -328,7 +329,7 @@ async function _render (view, options, hooks) {
       createAttrString(view, options.escapeAttributeValue) +
       (options.strict ? '/' : '') +
       '>'
-    ), headers: {}}
+    )}
   }
   return {body: [
     '<',
@@ -339,7 +340,7 @@ async function _render (view, options, hooks) {
     '</',
     view.tag,
     '>'
-  ].join(''), headers: {}}
+  ].join('')}
 }
 
 module.exports = render
