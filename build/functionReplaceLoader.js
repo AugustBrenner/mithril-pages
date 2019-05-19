@@ -53,7 +53,7 @@ function matchCallExpressions(node, caller_name){
 
 		if(node.type === 'CallExpression' && (node.callee.name || node.callee.property)){
 
-			if(!node.callee.name && !node.callee.property) console.log(node.callee)
+			// if(!node.callee.name && !node.callee.property) console.log(node.callee)
 
 			const name = node.callee.name || node.callee.property.name
 

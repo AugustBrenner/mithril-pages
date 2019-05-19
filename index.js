@@ -6,6 +6,8 @@ const url 						= require("url")
 const webpack 					= require('webpack')
 const MemoryFileSystem 			= require('memory-fs')
 const requireFromString 		= require('require-from-string')
+const sourceMap 				= require('source-map')
+const ErrorStackParser 			= require('error-stack-parser')
 
 const webpackDevMiddleware 		= require('webpack-dev-middleware')
 const webapckHotMiddleware 		= require("webpack-hot-middleware")
@@ -128,7 +130,7 @@ const render = args => (req, res) => {
 
 	if(/\.json$/.test(req.url)){
 
-		console.log('URL', req.url)
+		// console.log('URL', req.url)
 		
 		req_url = req_url.replace(/^\/__index__/, '/')
 
@@ -152,7 +154,7 @@ const render = args => (req, res) => {
 		delete store.__hashes
 
 
-		console.log(JSON.stringify(store, null, 2))
+		// console.log(JSON.stringify(store, null, 2))
 		store.__pages = undefined
 		delete store.__pages
 
@@ -176,7 +178,30 @@ const render = args => (req, res) => {
 console.timeEnd('Time')
 		res.send(view)
 	})
-	.catch(console.error)
+	.catch(error => {
+		const consumer = new sourceMap.SourceMapConsumer(args.sourcemap)
+
+		const stack = ErrorStackParser.parse(error)
+
+		// const node =  sourceMap.SourceNode.fromStringWithSourceMap(code, consumer)
+
+		var bundle_traces = stack.filter(trace => {
+			return trace.fileName === args.filename
+		})
+		.map(trace => {
+			trace.original = consumer.originalPositionFor({
+				line: trace.lineNumber,
+				column: trace.columnNumber,
+			})
+			return trace
+		})
+		.map(trace => {
+			trace.original.source = trace.original.source.replace('webpack://app', process.cwd())
+			return trace
+		})
+
+		console.log(bundle_traces, '\n', error)
+	})
 
 
 }
@@ -221,6 +246,7 @@ m.init = function(pathname, options){
 	const compiler_client = webpack(client_config)
 
 	const devMiddleware = webpackDevMiddleware(compiler_client, {
+		logLevel: 'silent',
 	    serverSideRender: true,
 	    // stats: "verbose",
 	    watchOptions: {
@@ -233,7 +259,7 @@ m.init = function(pathname, options){
 
 		compiler_server.run((error, stats) => {
 
-			console.log('\n\n', stats.toString({colors: true}))
+			// console.log('\n\n', stats.toString({colors: true}))
 
 			const assetsByChunkName = stats.toJson().assetsByChunkName
 			const outputPath = stats.toJson().outputPath
@@ -257,31 +283,45 @@ m.init = function(pathname, options){
 		// Build Server
 		compiler_server.watch({ 
 		    aggregateTimeout: 300,
+		    logLevel: 'silent',
 		    watchOptions: {
 				// ignored: ['./**/*']
 			}
 		}, (error, stats) => {
 
-			console.log('\n\n', stats.toString({colors: true}))
+			// console.log('\n\n', stats.toString({colors: true}))
+
+			// console.log(JSON.stringify(stats.toJson(), null, 2))
+
+			if(stats.toJson().errors.length > 0) return
+
 
 			const assetsByChunkName = stats.toJson().assetsByChunkName
 			const outputPath = stats.toJson().outputPath
 
 
-			var scripts = normalizeAssets(assetsByChunkName.main)
+			var code = normalizeAssets(assetsByChunkName.main)
 				.filter((path) => path.endsWith('.js'))
 				.map((path) => fileSystem.readFileSync(outputPath + '/' + path))
 				.join('\n')
 
-			args.routes = requireFromString(scripts)
+			var sourcemap = normalizeAssets(assetsByChunkName.main)
+				.filter((path) => path.endsWith('.map'))
+				.map((path) => fileSystem.readFileSync(outputPath + '/' + path))
+				.join('\n')
 
+			args.routes = requireFromString(code, filepath)
+			args.sourcemap = sourcemap
+			args.filename = filepath
+			args.dirname = dirpath
 		})
 
 
 
 		// Build Client
-
-		const hotMiddleware = webapckHotMiddleware(compiler_client)
+		const hotMiddleware = webapckHotMiddleware(compiler_client, {
+			log: false
+		})
 
 
 

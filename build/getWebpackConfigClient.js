@@ -3,8 +3,8 @@ const crypto = require('crypto')
 const webpack = require('webpack')
 const merge = require('webpack-merge')
 const HardSourceWebpackPlugin = require('hard-source-webpack-plugin')
+const FriendlyErrorsWebpackPlugin = require('friendly-errors-webpack-plugin')
 
-console.log(process.cwd())
 module.exports = function(pathname, dirname, production){
 
 	var common = {
@@ -50,8 +50,6 @@ module.exports = function(pathname, dirname, production){
 
 									require_path = require_path.replace(rootContext, '.')
 
-									console.log(require_path)
-
 									var resource_path = resourcePath.replace(rootContext, '')
 
 									var md5sum = crypto.createHash('md5')
@@ -66,7 +64,18 @@ module.exports = function(pathname, dirname, production){
 				}
 			]
 		},
-		plugins: [],
+		plugins: [
+			new FriendlyErrorsWebpackPlugin({
+				compilationSuccessInfo: {
+					messages: ['You application is running here http://localhost:3000'],
+					notes: ['Some additional notes to be displayed upon successful compilation']
+				},
+				// onErrors: function (severity, errors) {},
+				clearConsole: true,
+				// additionalFormatters: [],
+				// additionalTransformers: []
+			})
+		],
 	}
 
 

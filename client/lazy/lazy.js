@@ -24,7 +24,7 @@ var lazy = {
 			promise: promise,
 			resolved: false,
 			component: undefined,
-			placeholder: placeholder || {view: function(vnode) { console.log('DEFAULT PLACEHOLDER'); return [m('head'), m('body')]}},
+			placeholder: placeholder || {view: function(vnode) { /*console.log('DEFAULT PLACEHOLDER');*/ return [m('head'), m('body')]}},
 			error: undefined || {view: function(vnode) {return [m('head'), m('body', 'Error')]}},
 			options: options,
 			key: key, 
@@ -34,7 +34,7 @@ var lazy = {
 				var comp = lazy.components[key]
 				
 				attempt = attempt || 1
-				console.log('RESOVLE', attempt, comp.key)
+				// console.log('RESOVLE', attempt, comp.key)
 
 				if(attempt >= 10){
 					comp.resolving = false
@@ -45,7 +45,7 @@ var lazy = {
 
 				if(document.head){
 					try{
-						console.log("FETCH")
+						// console.log("FETCH")
 						return comp.promise()
 						.then(component => {
 							comp.component = component
@@ -73,7 +73,7 @@ var lazy = {
 				}
 				else{
 					return new Promise(function(resolve, reject){
-						console.log('WAITING FOR HEAD')
+						// console.log('WAITING FOR HEAD')
 						setTimeout(function(){
 							comp.resolve(should_redraw, attempt + 1)
 							.then(resolve)
@@ -87,7 +87,7 @@ var lazy = {
 
 
 		var has_loaded = window["webpackJsonpapp"].reduce((loaded, bundle) => {
-			console.log(bundle)
+			// console.log(bundle)
 			return loaded || bundle[0][0] === key
 		}, null)
 

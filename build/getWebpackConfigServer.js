@@ -4,6 +4,7 @@ const webpack = require('webpack')
 const merge = require('webpack-merge')
 const nodeExternals = require('webpack-node-externals')
 const HardSourceWebpackPlugin = require('hard-source-webpack-plugin')
+const FriendlyErrorsWebpackPlugin = require('friendly-errors-webpack-plugin')
 
 
 module.exports = function(pathname, dirname, production){
@@ -65,7 +66,18 @@ module.exports = function(pathname, dirname, production){
 				},
 			]
 		},
-		plugins: [],
+		plugins: [
+			// new FriendlyErrorsWebpackPlugin({
+			// 	compilationSuccessInfo: {
+			// 		messages: ['Application Server successfully running'],
+			// 		// notes: ['Some additional notes to be displayed upon successful compilation']
+			// 	},
+			// 	// onErrors: function (severity, errors) {},
+			// 	clearConsole: true,
+			// 	// additionalFormatters: [],
+			// 	// additionalTransformers: []
+			// })
+		],
 	}
 
 
@@ -80,7 +92,7 @@ module.exports = function(pathname, dirname, production){
 
 	var dev = {
 		mode: 'development',
-		devtool: 'inline-source-map',
+		devtool: 'source-map',
 		module: {
 			rules: [
 				{
