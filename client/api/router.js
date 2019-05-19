@@ -18,7 +18,7 @@ module.exports = function($window, redrawService) {
 	var render, component, attrs, currentPath, lastUpdate, routesObject, storeObject
 	//<<<<<<< Modified: Added store to route parameters
 	var route = function(root, defaultRoute, routes, store) {
-		routesObject = routes
+		routesObject = routes.routes
 		storeObject = store
 		if(typeof store !== "object") throw new Error("Ensure the store argument is type 'object'.")
 
@@ -43,7 +43,7 @@ module.exports = function($window, redrawService) {
 			if (path !== defaultRoute) routeService.setPath(defaultRoute, null, {replace: true})
 			else throw new Error("Could not resolve default route " + defaultRoute)
 		}
-		routeService.defineRoutes(routes, function(payload, params, path, route) {
+		routeService.defineRoutes(routesObject, function(payload, params, path, route) {
 
 			//<<<<<<< Modified: Added Lazy route loading
 			var update = lastUpdate = function(routeResolver, comp) {
