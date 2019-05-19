@@ -61,11 +61,7 @@ var Router = function(originalUrl, routes){
 
 		if(!results.component){
 
-			results.component = {view: function(){ return m('p', 'Loading...')}}
-			
-			results.params = {params: {}, query: {}}
-
-			return results
+			return null
 		}
 
 		if(results.component.view) return results

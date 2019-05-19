@@ -26,6 +26,7 @@ const COMPONENT_PROPS = [
   'oninit',
   //<<<<<<< Modified: Added store to vnode
   'fetch',
+  'headers',
   //=======
   //>>>>>>>
   'view',
@@ -203,10 +204,10 @@ function createAttrString (view, escapeAttributeValue) {
 
 async function createChildrenContent (view, options, hooks) {
   if (view.text != null) {
-    return options.escapeString(view.text)
+    return {body: options.escapeString(view.text), headers: {}}
   }
   if (isArray(view.children) && !view.children.length) {
-    return ''
+    return {body: '', headers: {}}
   }
   return _render(view.children, options, hooks)
 }
@@ -245,24 +246,27 @@ async function _render (view, options, hooks) {
   const type = typeof view
 
   if (type === 'string') {
-    return view
+    return {body: view, headers: {}}
   }
 
   if (type === 'number' || type === 'boolean') {
-    return view
+    return {body: view, headers: {}}
   }
 
   if (!view) {
-    return ''
+    return {body: '', headers: {}}
   }
 
   if (isArray(view)) {
-    let result = ''
+    let body = ''
+    let headers = {}
 
     for (const v of view) {
-      result += await _render(v, options, hooks)
+      let result = await _render(v, options, hooks)
+      body += result.body
+      headers = Object.assign(headers, result.headers)
     }
-    return result
+    return {body: body, headers: headers}
   }
 
   if (view.attrs) {
@@ -292,44 +296,50 @@ async function _render (view, options, hooks) {
       vnode.attrs = component.attrs || view.attrs || {}
 
       await setHooks(component, vnode, hooks)
-      return _render(component.view.call(vnode.state, vnode), options, hooks)
+
+      const result = await _render(component.view.call(vnode.state, vnode), options, hooks)
+      const headers = component.headers ? component.headers.call(vnode.state, vnode) : {}
+      return {
+        body: result.body,
+        headers: Object.assign(headers, result.headers)
+      }
     }
   }
 
   if(!view.tag) throw new Error('Node must not be a function reference.\n\n' + view.toString())
 
   if (view.tag === '<') {
-    return '' + view.children
+    return {body: '' + view.children, headers: {}}
   }
   const children = await createChildrenContent(view, options, hooks)
   if (view.tag === '#') {
-    return options.escapeString(children)
+    return {body: options.escapeString(children.body), headers: {}}
   }
   if (view.tag === '[') {
-    return '' + children
+    return {body: '' + children.body, headers: children.headers}
   }
   if (
     !children &&
     (options.strict || VOID_TAGS.indexOf(view.tag.toLowerCase()) >= 0)
   ) {
-    return (
+    return {body: (
       '<' +
       view.tag +
       createAttrString(view, options.escapeAttributeValue) +
       (options.strict ? '/' : '') +
       '>'
-    )
+    ), headers: {}}
   }
-  return [
+  return {body: [
     '<',
     view.tag,
     createAttrString(view, options.escapeAttributeValue),
     '>',
-    children,
+    children.body,
     '</',
     view.tag,
     '>'
-  ].join('')
+  ].join(''), headers: {}}
 }
 
 module.exports = render

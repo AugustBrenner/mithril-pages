@@ -139,15 +139,30 @@ const render = args => (req, res) => {
 		fetch_data_only = true
 	}
 
+	let status = 200
 
 	const store = {__pages:{}, __components:{}}
 
 	store.__pages[req_url] = {}
 
-	const component = route(req_url, args.routes)
+	let component = route(req_url, args.routes.routes)
+
+	if(!component && args.routes.statusResponses['404']){
+
+		component = {component: args.routes.statusResponses['404'], params: {}}
+
+		status = 404
+	}
+
+	else if(!component) { 
+		return res.sendStatus(404)
+	}
 
 
-	componentToHtml(component.component, component.params, {store: store, path: req_url, data_only: fetch_data_only}).then(view => {
+
+	componentToHtml(component.component, component.params, {store: store, path: req_url, data_only: fetch_data_only}).then(response => {
+		let html = response.body
+		const headers = response.headers
 
 		var hashes = store.__hashes || []
 		store.__hashes = undefined
@@ -172,11 +187,13 @@ const render = args => (req, res) => {
 
 		scripts = `<script>window.__mithril_pages_store__ = ${JSON.stringify(store)}</script>` + scripts
 
-		view = view.replace(/__mithril_pages_styles__/, `<style class="__mithril_pages_styles__">${styles}</style>`)
-		view = view.replace(/__mithril_pages_scripts__/, scripts)
-		// view = view.replace(/__mithril_pages_store__/, JSON.stringify(store))
-console.timeEnd('Time')
-		res.send(view)
+		html = html.replace(/__mithril_pages_styles__/, `<style class="__mithril_pages_styles__">${styles}</style>`)
+		html = html.replace(/__mithril_pages_scripts__/, scripts)
+		// html = html.replace(/__mithril_pages_store__/, JSON.stringify(store))
+
+		console.timeEnd('Time')
+
+		res.status(status).send(html)
 	})
 	.catch(error => {
 		const consumer = new sourceMap.SourceMapConsumer(args.sourcemap)
