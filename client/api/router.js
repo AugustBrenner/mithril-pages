@@ -21,7 +21,6 @@ module.exports = function($window, redrawService) {
 		routesObject = routes.routes
 		storeObject = store
 		if(typeof store !== "object") throw new Error("Ensure the store argument is type 'object'.")
-
 	//=======
 	// var render, component, attrs, currentPath, lastUpdate
 	// var route = function(root, defaultRoute, routes) {
@@ -29,7 +28,19 @@ module.exports = function($window, redrawService) {
 		if (root == null) throw new Error("Ensure the DOM element that was passed to `m.route` is not undefined")
 		function run() {
 			//<<<<<<< Modified: Added store to vnode
-			if (render != null) redrawService.render(root, render(Vnode(component, attrs.key, attrs, store)))
+			if (render != null){
+				try{
+					redrawService.render(root, render(Vnode(component, attrs.key, attrs, store)))
+				}
+				catch(e){
+					document.documentElement.vnodes = null
+					if(component.view) delete component.view.$$reentrantLock$$
+					attrs.error = e
+					if(routes.statusResponses && routes.statusResponses['500']){
+						redrawService.render(root, render(Vnode(routes.statusResponses['500'], attrs.key, attrs, store)))
+					}
+				}
+			}
 			//=======
 			// if (render != null) redrawService.render(root, render(Vnode(component, attrs.key, attrs)))
 			//>>>>>>>
@@ -39,11 +50,28 @@ module.exports = function($window, redrawService) {
 			redraw = redrawService.redraw
 		}
 		redrawService.subscribe(root, run)
-		var bail = function(path) {
-			if (path !== defaultRoute) routeService.setPath(defaultRoute, null, {replace: true})
-			else throw new Error("Could not resolve default route " + defaultRoute)
-		}
+		//<<<<<<< Modified: Added store to vnode
+		//=======
+		// var bail = function(path) {
+		// 	if (path !== defaultRoute) routeService.setPath(defaultRoute, null, {replace: true})
+		// 	else throw new Error("Could not resolve default route " + defaultRoute)
+		// }
+		//>>>>>>>
 		routeService.defineRoutes(routesObject, function(payload, params, path, route) {
+
+			//<<<<<<< Modified: Added store to vnode
+			if(!payload){
+				if(routes.statusResponses && routes.statusResponses['404']){
+					payload = routes.statusResponses['404']
+					console.log('Not Found')
+				}
+				else{
+					if (path !== defaultRoute) return routeService.setPath(defaultRoute, null, {replace: true})
+					else throw new Error("Could not resolve default route " + defaultRoute)
+				}
+			}
+			//=======
+			//>>>>>>>
 
 			//<<<<<<< Modified: Added Lazy route loading
 			var update = lastUpdate = function(routeResolver, comp) {
@@ -107,7 +135,7 @@ module.exports = function($window, redrawService) {
 			// 	else update(payload, "div")
 			// }
 			//>>>>>>>
-		}, bail)
+		})
 	}
 	route.set = function(path, data, options) {
 		if (lastUpdate != null) {
@@ -127,7 +155,7 @@ module.exports = function($window, redrawService) {
 		if(!vnode.state._href || vnode.state._href !== href){
 			routeService.matchRoute(vnode.dom.getAttribute("href"), routesObject, function(component, params, path, route){
 
-				// console.log(route)
+				if(!component) return
 
 				if(component.resolve){
 

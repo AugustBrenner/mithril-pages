@@ -136,18 +136,15 @@ module.exports = function($window) {
 		else $window.location.href = router.prefix + path
 	}
 	//<<<<<<< Modified: Added store to vnode
-	router.matchRoute = function(path, routes, resolve, reject){
+	router.matchRoute = function(path, routes, resolve){
 
-		var query = {}
-		var hash = {}
-		var params = {}
-		var history = {}
+		var params = {query: {}, params: {}, hash: {}, history: {}}
 
-		var pathname = router.parsePath(path, query, hash)
+		var pathname = router.parsePath(path, params.query, params.hash)
 
 		var state = $window.history.state
 		if (state != null) {
-			for (var k in state) history[k] = state[k]
+			for (var k in state) params.history[k] = state[k]
 		}
 
 		for (var route in routes) {
@@ -157,24 +154,23 @@ module.exports = function($window) {
 					var keys = route.match(/:[^\/]+/g) || []
 					var values = [].slice.call(arguments, 1, -2)
 					for (var i = 0; i < keys.length; i++) {
-						params[keys[i].replace(/:|\./g, "")] = decodeURIComponent(values[i])
+						params.params[keys[i].replace(/:|\./g, "")] = decodeURIComponent(values[i])
 					}
-					var allParams = {query: query, params: params, hash: hash, history: history}
-					resolve(routes[route], allParams, path, route)
+					resolve(routes[route], params, path, route)
 				})
 				return
 			}
 		}
 
-		reject(path, params)
+		resolve(null, params, path, route)
 	}
 
-	router.defineRoutes = function(routes, resolve, reject) {
+	router.defineRoutes = function(routes, resolve) {
 		function resolveRoute() {
 
 			var path = router.getPath()
 			
-			router.matchRoute(path, routes, resolve, reject)
+			router.matchRoute(path, routes, resolve)
 		}
 
 		if (supportsPushState) $window.onpopstate = debounceAsync(resolveRoute)
