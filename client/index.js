@@ -59,20 +59,24 @@ function Stylesheet(styleObject){
 	})
 	self.__path = styleObject[0][0]
 	self.__ruleset = styleObject.toString()
-}
 
-Stylesheet.prototype.render = function(){
-	var self = this
-	return m({
+	self.stylesheet = m({
 		view: function(vnode){
 			if(!vnode.page.__styles) vnode.page.__styles = {}
 			if(vnode.page.__styles[self.__path]){
 				return null
 			}
 			vnode.page.__styles[self.__path] = true
-			return m('style', {type:"text/css", key: self.__path}, self.__ruleset)
-		}
+			return m('style', {type:"text/css"}, self.__ruleset)
+		},
+	}, {
+		key: self.__path,
 	})
+}
+
+Stylesheet.prototype.render = function(page){
+
+	return this.stylesheet
 }
 
 function Stylestore(){
