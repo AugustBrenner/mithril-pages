@@ -1,6 +1,7 @@
 const esprima = require('esprima')
 const escodegen = require('escodegen')
 const utils = require('loader-utils')
+const webpackSource = require('webpack-sources')
 
 function match(expressions){}
 
@@ -131,6 +132,7 @@ module.exports = function(source, map) {
 			})
 			.map(match => match.call)
 
+		var Source = new webpackSource.ReplaceSource(new webpackSource.SourceMapSource(source, this.resourcePath, map))
 
 
 		let offset = 0
@@ -146,19 +148,24 @@ module.exports = function(source, map) {
 			let end = call.range[1]
 
 
-			start += offset
-			end += offset
+			// start += offset
+			// end += offset
 
-			offset = offset + replacement.length - (end - start)
+			// offset = offset + replacement.length - (end - start)
 
-			source = source.substring(0, start) + replacement + source.substring(end)
+			Source.replace(start, end, replacement)
+
+			// source = source.substring(0, start) + replacement + source.substring(end)
 			
 		})
+
+
+		var results = Source.sourceAndMap()
   
 
 	}catch(e){
 		console.log(e)
 	}
 	// console.timeEnd('timer')
-	this.callback(null, source, map)
+	this.callback(null, results.source, results.map)
 }

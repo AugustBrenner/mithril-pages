@@ -19,7 +19,7 @@ const resolveFile 				= require('./build/resolveFile.js')
 const getWebpackConfigClient 	= require('./build/getWebpackConfigClient.js')
 const getWebpackConfigServer 	= require('./build/getWebpackConfigServer.js')
 
-const mithril 					= require('./server')
+const m 						= require('./server')
 
 
 const fileSystem 				= new MemoryFileSystem()
@@ -103,6 +103,29 @@ function isObject(obj){
 	return typeof obj === 'object'
 }
 
+function generateDefaultComponent(text, status){
+
+	return {
+		headers: function(vnode){
+			return {
+				status: status
+			}
+		},
+
+		view: function(vnode) {
+			return [
+				m('head', [
+					m('title', `${status} (${text})`),
+				]),
+				m('body', [
+					m('pre', text),
+					m.scripts,
+				]),
+			]
+		}
+	}
+}
+
 
 
 
@@ -153,14 +176,15 @@ const render = args => (req, res) => {
 		component = {component: args.routes.statusResponses['404'], params: {}}
 	}
 
-	else if(!component) { 
-		return res.sendStatus(404)
+	else if(!component) {
+		console.log('No 404 page specified.')
+		component = {component: generateDefaultComponent('Not Found', 404), params:{}}
 	}
 
 
 
 	function renderComponent(component, store){
-		return componentToHtml(component.component, component.params, {store: store, path: req_url, data_only: fetch_data_only}).then(response => {
+		return componentToHtml(component.component, component.params, {store: store, path: req_url, data_only: fetch_data_only, strict: true}).then(response => {
 			let html = response.body
 			const headers = response.headers
 
@@ -203,38 +227,21 @@ const render = args => (req, res) => {
 	}
 	renderComponent(component, store)
 	.catch(error => {
-		var bundle_traces = error
-		// const consumer = new sourceMap.SourceMapConsumer(args.sourcemap)
-
-		// const stack = ErrorStackParser.parse(error)
-
-		// // const node =  sourceMap.SourceNode.fromStringWithSourceMap(code, consumer)
-
-		// var bundle_traces = stack.filter(trace => {
-		// 	return trace.fileName === args.filename
-		// })
-		// .map(trace => {
-		// 	trace.original = consumer.originalPositionFor({
-		// 		line: trace.lineNumber,
-		// 		column: trace.columnNumber,
-		// 	})
-		// 	return trace
-		// })
-		// .map(trace => {
-		// 	trace.original.source = trace.original.source.replace('webpack://app', process.cwd())
-		// 	return trace
-		// })
 
 
-		if(fetch_data_only) return res.status(500).json({error: bundle_traces})
-		
-		console.log(bundle_traces, '\n', error)
+		if(fetch_data_only || !args.routes.statusResponses || !args.routes.statusResponses['500']){
+			if(!fetch_data_only) console.log('No 500 page specified. Logging error...')
+			console.error(error)
+			return renderComponent({
+				component: generateDefaultComponent('Internal Server Error', 500), params: {error: error}
+			}, store)
+		}
 
 		store = {__pages:{}, __components:{}}
 
 		store.__pages[req_url] = {}
 
-		return renderComponent({component: args.routes.statusResponses['500'], params: {error: bundle_traces}}, store)
+		return renderComponent({component: args.routes.statusResponses['500'], params: {error: error}}, store)
 
 	})
 
@@ -244,7 +251,6 @@ const render = args => (req, res) => {
 
 
 
-const m = {}
 
 m.init = function(pathname, options){
 

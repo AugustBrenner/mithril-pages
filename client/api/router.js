@@ -1,5 +1,6 @@
 "use strict"
 
+var m = require('../render/hyperscript')
 var Vnode = require("../render/vnode")
 //<<<<<<< Modified: Require path changed to original mithril components
 var Promise = require("../../mithril/promise/promise")
@@ -10,6 +11,21 @@ var buildQueryString = require("../../mithril/querystring/build")
 // var Promise = require("../promise/promise")
 // var coreRouter = require("../router/router")
 //>>>>>>>
+
+function generateDefaultComponent(text, status) {
+	return {
+		view: function(vnode){
+			return[
+				m('head', [
+					status ? m('title', status + ' (' + text + ')') : null
+				]),
+				m('body', [
+					m('pre', text),
+				])
+			]
+		}
+	}
+}
 
 module.exports = function($window, redrawService) {
 	var routeService = coreRouter($window)
@@ -39,6 +55,11 @@ module.exports = function($window, redrawService) {
 					if(routes.statusResponses && routes.statusResponses['500']){
 						redrawService.render(root, render(Vnode(routes.statusResponses['500'], attrs.key, attrs, store)))
 					}
+					else{
+						console.log('No 500 page specified.')
+						redrawService.render(root, render(Vnode(generateDefaultComponent('Internal Server Error', 500), attrs.key, attrs, store)))
+						console.error(e)
+					}
 				}
 			}
 			//=======
@@ -63,11 +84,12 @@ module.exports = function($window, redrawService) {
 			if(!payload){
 				if(routes.statusResponses && routes.statusResponses['404']){
 					payload = routes.statusResponses['404']
-					console.log('Not Found')
 				}
 				else{
-					if (path !== defaultRoute) return routeService.setPath(defaultRoute, null, {replace: true})
-					else throw new Error("Could not resolve default route " + defaultRoute)
+					console.log('No 404 page specified.')
+					payload = generateDefaultComponent('Not Found', 404)
+					// if (path !== defaultRoute) return routeService.setPath(defaultRoute, null, {replace: true})
+					// else throw new Error("Could not resolve default route " + defaultRoute)
 				}
 			}
 			//=======
@@ -107,7 +129,7 @@ module.exports = function($window, redrawService) {
 							update(payload, resolved)
 						}, bail)
 					}
-					else update(payload, "div")
+					else update(payload, generateDefaultComponent('Loading...'))
 				}
 			}
 

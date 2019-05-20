@@ -320,7 +320,7 @@ async function _render (view, options, hooks) {
     return {body: '' + children.body, headers: children.headers}
   }
   if (
-    !children &&
+    !children.body &&
     (options.strict || VOID_TAGS.indexOf(view.tag.toLowerCase()) >= 0)
   ) {
     return {body: (
