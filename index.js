@@ -8,6 +8,7 @@ const MemoryFileSystem 			= require('memory-fs')
 const requireFromString 		= require('require-from-string')
 const sourceMap 				= require('source-map')
 const ErrorStackParser 			= require('error-stack-parser')
+const SourceMapSupport 			= require('source-map-support')
 
 const webpackDevMiddleware 		= require('webpack-dev-middleware')
 const webapckHotMiddleware 		= require("webpack-hot-middleware")
@@ -202,26 +203,27 @@ const render = args => (req, res) => {
 	}
 	renderComponent(component, store)
 	.catch(error => {
-		const consumer = new sourceMap.SourceMapConsumer(args.sourcemap)
+		var bundle_traces = error
+		// const consumer = new sourceMap.SourceMapConsumer(args.sourcemap)
 
-		const stack = ErrorStackParser.parse(error)
+		// const stack = ErrorStackParser.parse(error)
 
-		// const node =  sourceMap.SourceNode.fromStringWithSourceMap(code, consumer)
+		// // const node =  sourceMap.SourceNode.fromStringWithSourceMap(code, consumer)
 
-		var bundle_traces = stack.filter(trace => {
-			return trace.fileName === args.filename
-		})
-		.map(trace => {
-			trace.original = consumer.originalPositionFor({
-				line: trace.lineNumber,
-				column: trace.columnNumber,
-			})
-			return trace
-		})
-		.map(trace => {
-			trace.original.source = trace.original.source.replace('webpack://app', process.cwd())
-			return trace
-		})
+		// var bundle_traces = stack.filter(trace => {
+		// 	return trace.fileName === args.filename
+		// })
+		// .map(trace => {
+		// 	trace.original = consumer.originalPositionFor({
+		// 		line: trace.lineNumber,
+		// 		column: trace.columnNumber,
+		// 	})
+		// 	return trace
+		// })
+		// .map(trace => {
+		// 	trace.original.source = trace.original.source.replace('webpack://app', process.cwd())
+		// 	return trace
+		// })
 
 
 		if(fetch_data_only) return res.status(500).json({error: bundle_traces})
@@ -338,15 +340,49 @@ m.init = function(pathname, options){
 				.map((path) => fileSystem.readFileSync(outputPath + '/' + path))
 				.join('\n')
 
+			// console.log(code)
+
 			var sourcemap = normalizeAssets(assetsByChunkName.main)
 				.filter((path) => path.endsWith('.map'))
 				.map((path) => fileSystem.readFileSync(outputPath + '/' + path))
 				.join('\n')
 
+			sourcemap = JSON.parse(sourcemap)
+
+			sourcemap.sources = sourcemap.sources.map(source => {
+				return source.replace('webpack://app', path.resolve(dirpath, '..'))
+			})
+
 			args.routes = requireFromString(code, filepath)
+
+			SourceMapSupport.install({
+				retrieveSourceMap: function(source) {
+					if (source === filepath) {
+
+						return {
+							map: sourcemap,
+						}
+					}
+					return null
+				}
+			})
 			args.sourcemap = sourcemap
 			args.filename = filepath
 			args.dirname = dirpath
+
+		})
+
+		SourceMapSupport.install({
+			retrieveSourceMap: (args => source => {
+				if (source === args.filename) {
+
+					return {
+						url: args.filename,
+						map: args.sourcemap,
+					}
+				}
+				return null
+			})(args)
 		})
 
 

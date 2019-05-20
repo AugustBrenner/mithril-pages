@@ -94,8 +94,8 @@ function tokenizeMemberExpression(node){
 
 
 
-module.exports = function(source) {
-
+module.exports = function(source, map) {
+	// console.log(this.resourcePath)
 	// console.time('timer')
 
 	try{
@@ -110,12 +110,12 @@ module.exports = function(source) {
 		const match_ast = esprima.parse(options.match)
 
 		var match_tokens = tokenizeExpressionStatementOrCallExpression(match_ast)
-
-		var quick_check_regex = new RegExp(match_tokens[match_tokens.length - 1])
+		var regexp = '(?=.*' + match_tokens.slice(1).join(')(?=.*') + ')'
+		var quick_check_regex = new RegExp(regexp)
 
 		if(!quick_check_regex.test(source)){
 			// console.timeEnd('timer')
-			return this.callback(null, source)
+			return this.callback(null, source, map)
 		}
 		
 		var match_string = match_tokens.join('.')
@@ -160,5 +160,5 @@ module.exports = function(source) {
 		console.log(e)
 	}
 	// console.timeEnd('timer')
-	this.callback(null, source)
+	this.callback(null, source, map)
 }
