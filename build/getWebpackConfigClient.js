@@ -5,14 +5,15 @@ const merge = require('webpack-merge')
 const HardSourceWebpackPlugin = require('hard-source-webpack-plugin')
 const FriendlyErrorsWebpackPlugin = require('friendly-errors-webpack-plugin')
 
-module.exports = function(pathname, dirname, production){
+module.exports = function(pathname, production){
 
 	var common = {
 		entry: [
 			path.resolve(__dirname, './bundle-bridge-client.js'),
 		],
+		context: path.dirname(pathname),
 		output: {
-			path: dirname,
+			path: '/',
 	        library: 'app',
 	        libraryTarget: 'umd'
 	    },
@@ -26,6 +27,22 @@ module.exports = function(pathname, dirname, production){
 		},
 		module: {
 			rules: [
+				{
+					test: /\.(png|jpe?g|gif|woff(2)?|ttf|eot|svg)$/,
+					use: [
+						{
+							loader: 'file-loader',
+							options: {
+								emitFile: false,
+								name: '[name].[ext]',
+								outputPath: (url, resourcePath, context) => {
+
+									return resourcePath
+								},
+							},
+						},
+					],
+				},
 		        { 
 		            include: [
           				path.resolve(__dirname, 'bundle-bridge-client.js')
@@ -225,7 +242,7 @@ module.exports = function(pathname, dirname, production){
 			namedModules: true,
 			namedChunks: true
 		},
-	    devtool: false,
+	    devtool: 'hidden-source-map',
 	}
 
 

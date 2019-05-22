@@ -7,12 +7,13 @@ const HardSourceWebpackPlugin = require('hard-source-webpack-plugin')
 const FriendlyErrorsWebpackPlugin = require('friendly-errors-webpack-plugin')
 
 
-module.exports = function(pathname, dirname, production){
+module.exports = function(pathname, production){
 
 	var common = {
 		entry: pathname,
+		context: path.dirname(pathname),
 		output: {
-			path: pathname,
+			path: '/',
 	        filename: 'bundle_server.js',
 	        library: 'app',
 	        libraryTarget: 'umd'
@@ -35,6 +36,21 @@ module.exports = function(pathname, dirname, production){
 		},
 		module: {
 			rules: [
+				{
+					test: /\.(png|jpe?g|gif|woff(2)?|ttf|eot|svg)$/,
+					use: [
+						{
+							loader: 'file-loader',
+							options: {
+								emitFile: false,
+								name: '[name].[ext]',
+								outputPath: (url, resourcePath, context) => {
+									return resourcePath
+								},
+							},
+						},
+					],
+				},
 		        {
 					test: /\.js$/,
 					exclude: /(node_modules|bower_components)/,
