@@ -53,7 +53,18 @@ module.exports = function($window, redrawService) {
 					if(component.view) delete component.view.$$reentrantLock$$
 					attrs.error = e
 					if(routes.statusResponses && routes.statusResponses['500']){
-						redrawService.render(root, render(Vnode(routes.statusResponses['500'], attrs.key, attrs, store)))
+
+						if(!routes.statusResponses['500'].resolve){
+							redrawService.render(root, render(Vnode(component, attrs.key, attrs, store)))
+						}
+						else{
+							routes.statusResponses['500'].resolve().then(function(component){
+								document.documentElement.vnodes = null
+								if(component.view) delete component.view.$$reentrantLock$$
+								redrawService.render(root, render(Vnode(component, attrs.key, attrs, store)))
+							})
+							redrawService.render(root, render(Vnode(routes.statusResponses['500'].placeholder, attrs.key, attrs, store)))
+						}
 					}
 					else{
 						console.log('No 500 page specified.')
@@ -80,20 +91,6 @@ module.exports = function($window, redrawService) {
 		//>>>>>>>
 		routeService.defineRoutes(routesObject, function(payload, params, path, route) {
 
-			//<<<<<<< Modified: Added store to vnode
-			if(!payload){
-				if(routes.statusResponses && routes.statusResponses['404']){
-					payload = routes.statusResponses['404']
-				}
-				else{
-					console.log('No 404 page specified.')
-					payload = generateDefaultComponent('Not Found', 404)
-					// if (path !== defaultRoute) return routeService.setPath(defaultRoute, null, {replace: true})
-					// else throw new Error("Could not resolve default route " + defaultRoute)
-				}
-			}
-			//=======
-			//>>>>>>>
 
 			//<<<<<<< Modified: Added Lazy route loading
 			var update = lastUpdate = function(routeResolver, comp) {
@@ -108,37 +105,40 @@ module.exports = function($window, redrawService) {
 				redraw()
 			}
 
-			var asyncComponent
+			if(!payload){
 
-			if(payload.resolve){
-				asyncComponent = payload
-				payload = payload.component || payload.placeholder
-			}
-
-			if(asyncComponent && asyncComponent.resolved){
-				asyncComponent.resolve().then(component => {
-					lastUpdate = update
-					update({}, component)
-				})
-			}
-			else if(payload){
-				if (payload.view || typeof payload === "function") update({}, payload)
-				else {
-					if (payload.onmatch) {
-						Promise.resolve(payload.onmatch(params, path, route)).then(function(resolved) {
-							update(payload, resolved)
-						}, bail)
-					}
-					else update(payload, generateDefaultComponent('Loading...'))
+				if(routes.statusResponses && routes.statusResponses['404']){
+					payload = routes.statusResponses['404']
+				}
+				else{
+					console.log('No 404 page specified.')
+					payload = generateDefaultComponent('Not Found', 404)
 				}
 			}
 
-			if(asyncComponent && !asyncComponent.resolved){
-				asyncComponent.resolve().then(component => {
-					lastUpdate = update
-					update({}, component)
-				})
+			if(payload.resolve){
+
+				if(!payload.resolved){
+					payload.resolve().then(component => {
+						lastUpdate = update
+						update({}, component)
+					})
+				}
+
+				payload = payload.component || payload.placeholder
 			}
+
+
+			if (payload.view || typeof payload === "function") update({}, payload)
+			else {
+				if (payload.onmatch) {
+					Promise.resolve(payload.onmatch(params, path, route)).then(function(resolved) {
+						update(payload, resolved)
+					}, bail)
+				}
+				else update(payload, generateDefaultComponent('Loading...'))
+			}
+
 			//=======
 			// var update = lastUpdate = function(routeResolver, comp) {
 			// 	if (update !== lastUpdate) return

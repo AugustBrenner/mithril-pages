@@ -67,7 +67,7 @@ module.exports = function(pathname, production){
 									md5sum.update(path_hash)
 									path_hash = md5sum.digest('hex')
 
-									return  `m.lazy.require(require(${args[0]}), '${path_hash}')`
+									return  `m.lazy.require(require(${args[0]}), ${args[1]}, '${path_hash}')`
 								}
 							}
 						},

@@ -73,7 +73,7 @@ module.exports = function(pathname, production){
 									md5sum.update(resource_path + match)
 									var path_hash = md5sum.digest('hex')
 
-									return  `m.lazy.require(function(){return import(/* webpackChunkName: "${path_hash}" */ ${args[0]})}, ${args[1]}, ${args[2]}, '${path_hash}', '${require_path}')`
+									return  `m.lazy.require(function(){return import(/* webpackChunkName: "${path_hash}" */ ${args[0]})}, ${args[1]}, '${path_hash}', '${require_path}')`
 								}
 							}
 						},

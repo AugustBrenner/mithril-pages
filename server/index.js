@@ -33,7 +33,7 @@ m.route.param = function(){} // Polyfill
 m.lazy = {
 	load: function(){},
 	fetch: function(){},
-	require: function(component, fileHash){
+	require: function(component, options, fileHash){
 		component.__hash = fileHash
 		return component
 	}

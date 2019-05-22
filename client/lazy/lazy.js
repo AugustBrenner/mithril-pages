@@ -16,7 +16,7 @@ var lazy = {
 	retry: set('retry'),
 	setRedraw:set('redraw'),
 	components: {},
-	require: function(promise, placeholder, options, key, name){
+	require: function(promise, options, key, name){
 
 		options = options || {}
 
@@ -24,8 +24,8 @@ var lazy = {
 			promise: promise,
 			resolved: false,
 			component: undefined,
-			placeholder: placeholder || {view: function(vnode) { /*console.log('DEFAULT PLACEHOLDER');*/ return [m('head'), m('body')]}},
-			error: undefined || {view: function(vnode) {return [m('head'), m('body', 'Error')]}},
+			placeholder: options.placeholder || {view: function(vnode) { /*console.log('DEFAULT PLACEHOLDER');*/ return [m('head'), m('body')]}},
+			error: options.error || {view: function(vnode) {return [m('head'), m('body', 'Error')]}},
 			options: options,
 			key: key, 
 			name: name,
@@ -38,6 +38,7 @@ var lazy = {
 
 				if(attempt >= 10){
 					comp.resolving = false
+					console.log('More than 10')
 					return Promise.resolve(comp.error)
 				}
 
