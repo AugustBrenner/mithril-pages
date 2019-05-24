@@ -70,11 +70,9 @@ module.exports = function($window) {
 
 		var data_path = router.parsePath(path, queryData, {})
 
-		if(data_path ===  '/') data_path += '__index__'
-
 		var query = buildQueryString(queryData)
 		if (query) data_path += "?" + query
-		data_path += '.json'
+		data_path = data_path.replace(/\/?$/, '/index.json')
 
 		return data_path
 	}
@@ -139,6 +137,8 @@ module.exports = function($window) {
 	router.matchRoute = function(path, routes, resolve){
 
 		var params = {query: {}, params: {}, hash: {}, history: {}}
+
+		path = path.replace(/index.html$/, '')
 
 		var pathname = router.parsePath(path, params.query, params.hash)
 

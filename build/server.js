@@ -38,14 +38,25 @@ function isObject(obj){
 
 
 
-module.exports = function(entry, caller, options){
+	// const listeners = []
+	// this.on = listener => {
+	// 	listeners.push(listener)
+
+	// 	return function(){
+	// 		for(var i = listeners.length; i > 0; --i){
+	// 			if(listeners[i] == listeners) listeners.splice(i, 1)
+	// 		}
+	// 	}
+	// }
+
+	// var publish = function(app){
+	// 	for(var i = 0; i < listeners.length; i++){
+	// 		if(listeners[i] == listeners) listeners.splice(i, 1)
+	// 	}
+	// }
+module.exports = (entry, options) => new Promise((resolve, reject) => {
 
 	options = options || {}
-	
-
-	if(!path.isAbsolute(entry)){
-		entry = path.resolve(caller, '..', entry)
-	}
 
 
 	// Server config
@@ -76,6 +87,9 @@ module.exports = function(entry, caller, options){
 	})
 
 
+	var server_done = false
+	var response
+
 	if(options.production === true){
 
 		compiler_server.run((error, stats) => {
@@ -93,12 +107,37 @@ module.exports = function(entry, caller, options){
 
 			args.routes = requireFromString(scripts)
 
+			server_done = true
+			resolve([ devMiddleware, render(args) ])
 		})
 
-		return [ devMiddleware, render(args) ]
 
 	}
 	else {
+
+		SourceMapSupport.install({
+			retrieveSourceMap: (args => source => {
+				if (source === args.filename) {
+
+					return {
+						url: args.filename,
+						map: args.sourcemap,
+					}
+				}
+				return null
+			})(args)
+		})
+
+
+
+		// Build Client
+		const hotMiddleware = webapckHotMiddleware(compiler_client, {
+			log: false
+		})
+
+
+
+		response = [ devMiddleware, hotMiddleware, render(args) ]
 
 
 		// Build Server
@@ -155,31 +194,10 @@ module.exports = function(entry, caller, options){
 			args.sourcemap = sourcemap
 			args.filename = entry
 
+			if(server_done) return
+			server_done = true
+			resolve(response)
+
 		})
-
-		SourceMapSupport.install({
-			retrieveSourceMap: (args => source => {
-				if (source === args.filename) {
-
-					return {
-						url: args.filename,
-						map: args.sourcemap,
-					}
-				}
-				return null
-			})(args)
-		})
-
-
-
-		// Build Client
-		const hotMiddleware = webapckHotMiddleware(compiler_client, {
-			log: false
-		})
-
-
-
-		return [ devMiddleware, hotMiddleware, render(args) ]
-
 	}
-}
+})

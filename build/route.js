@@ -41,6 +41,8 @@ var Router = function(originalUrl, routes){
 
 		var results = {component: null, params: args}
 
+		pathname = pathname.replace(/index.html$/, '')
+
 		for (var route in routes) {
 			var matcher = new RegExp("^" + route.replace(/:[^\/]+?\.{3}/g, "(.*?)").replace(/:[^\/]+/g, "([^\\/]+)") + "\/?$")
 			if (matcher.test(pathname)) {

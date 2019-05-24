@@ -46,11 +46,7 @@ module.exports = args => (req, res) => {
 
 	if(/\.json$/.test(req.url)){
 
-		// console.log('URL', req.url)
-		
-		req_url = req_url.replace(/^\/__index__/, '/')
-
-		req_url = req_url.replace(/\.json$/, '')
+		req_url = req_url.replace(/\.json$/, '.html')
 
 		fetch_data_only = true
 	}
@@ -141,7 +137,7 @@ module.exports = args => (req, res) => {
 
 
 			// If only the data is requested, respond with the JSON data
-			if(fetch_data_only) return res.json(store)
+			if(fetch_data_only) return res.status(200).json(store)
 
 
 			// Compile all the bundle assets required by the page
@@ -159,7 +155,7 @@ module.exports = args => (req, res) => {
 
 			var scripts = `<script>window.__mithril_pages_store__ = ${JSON.stringify(store)}</script>`
 
-			scripts += bundles.map(path => `<script class= "__mithril_pages_scripts__" src="${path}" defer></script>`).join('\n')
+			scripts += bundles.map(path => `<script class= "__mithril_pages_scripts__" src="/${path}" defer></script>`).join('\n')
 
 
 			// Attach assets to the html

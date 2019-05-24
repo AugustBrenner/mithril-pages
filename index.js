@@ -3,6 +3,7 @@ const path 						= require('path')
 const m 						= require('./server')
 const server 					= require('./build/server')
 const resolveFile 				= require('./build/resolveFile')
+const generateStaticPages 		= require('./build/static')
 
 
 function getStack(){
@@ -24,9 +25,16 @@ function getStack(){
 
 m.init = function(entry, options){
 
-	var caller = resolveFile(getStack())
+	entry = resolveFile(entry, getStack())
 
-	return server(entry, caller, options)	
+	return server(entry, options)	
+}
+
+m.static = function(entry, map, options){
+
+	entry = resolveFile(entry, getStack())
+
+	generateStaticPages(entry, map, options)
 }
 
 module.exports = m

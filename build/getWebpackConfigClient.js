@@ -14,6 +14,7 @@ module.exports = function(pathname, production){
 		context: path.dirname(pathname),
 		output: {
 			path: '/',
+			publicPath: '/',
 	        library: 'app',
 	        libraryTarget: 'umd'
 	    },

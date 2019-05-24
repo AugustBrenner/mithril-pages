@@ -1,7 +1,9 @@
 var path 				= require('path')
 var fs 		 			= require('fs')
 
-function getCallerFile(stack) {
+function getCallerFile(entry, stack) {
+
+	if(path.isAbsolute(entry)) return entry
 
     var currentfile = stack.shift().getFileName()
 
@@ -11,7 +13,7 @@ function getCallerFile(stack) {
         
         callerfile = stack.shift().getFileName()
 
-        if(currentfile !== callerfile) return callerfile
+        if(currentfile !== callerfile) return path.resolve(callerfile, '..', entry)
     }
 }
 
