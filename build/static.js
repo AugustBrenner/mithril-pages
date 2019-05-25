@@ -118,7 +118,7 @@ module.exports = (entry, map, options) => {
 		async.parallel(assets.map(filepath => callback => compiler_client.outputFileSystem.readFile(filepath, (error, code) => {
 			safeWrite(path.resolve(options.output, '.' + filepath), code, callback)
 		})), (error, response) => {
-			console.log(error, response)
+			if(error) console.log(error)
 		})
 
 
@@ -168,7 +168,6 @@ module.exports = (entry, map, options) => {
 		})
 		.reduce((a, b) => a.concat(b), [])
 		.map(url => callback => {
-			console.log(url)
 			render({url: url}, {
 				locals: { webpackStats: bundle.client},
 				set: ()=>{},
@@ -181,7 +180,9 @@ module.exports = (entry, map, options) => {
 					},
 				})
 			})
-		}), console.error)
+		}), error => {
+			if(error) console.error(error)
+		})
 
 	})
 
