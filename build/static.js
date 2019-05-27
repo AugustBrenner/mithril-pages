@@ -164,6 +164,9 @@ module.exports = (entry, map, options) => {
 		async.series(map
 		.sort((a,b) => a.length - b.length)
 		.map(url => {
+			var tokens = url.split('?')
+			tokens[0] = tokens[0].replace(/\/?$/, '/')
+			url = tokens.join('?')
 			return [url.replace(/\/?$/, '/index.html'), url.replace(/\/?$/, '/index.json')]
 		})
 		.reduce((a, b) => a.concat(b), [])

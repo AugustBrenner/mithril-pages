@@ -160,6 +160,9 @@ module.exports = function($window, redrawService) {
 		})
 	}
 	route.set = function(path, data, options) {
+		var tokens = path.split('?')
+		tokens[0] = tokens[0].replace(/\/?$/, '/')
+		path = tokens.join('?')
 		if (lastUpdate != null) {
 			options = options || {}
 			options.replace = true

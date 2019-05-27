@@ -1003,6 +1003,7 @@ module.exports = function($window) {
 		    if(!vnode.store.__pages[cache.path]) vnode.store.__pages[cache.path] = {__components: {}}
 		    if(!vnode.store.__pages[cache.path].__components) vnode.store.__pages[cache.path].__components = {}
 		    vnode.store.__pages[cache.path].__components[key] = cache.expiresAt
+			console.log(vnode.store.__pages)
 
 		}
 		//=======

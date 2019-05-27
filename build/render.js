@@ -51,6 +51,10 @@ module.exports = args => (req, res) => {
 		fetch_data_only = true
 	}
 
+	req_url = req_url.replace(/\/?(index(\.html?)?)?$/, '/index.html')
+
+	console.log(req_url)
+
 
 	// Status code variable to set the response status
 	let status = 200

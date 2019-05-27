@@ -48,33 +48,28 @@ module.exports = function($window) {
 		return path.slice(0, pathEnd)
 	}
 
-	router.buildPath = function(path){
-
+	function buildPath(path, replacement){
 		if(!path) path = $window.location.pathname + $window.location.search
 
 		var queryData = {}
 
 		var data_path = router.parsePath(path, queryData, {})
 
+		data_path = data_path.replace(/\/?$/, '/')
+
 		var query = buildQueryString(queryData)
 		if (query) data_path += "?" + query
+		data_path = data_path.replace(/\/?(index(\.html?)?)?$/, replacement || '/index.html')
 
 		return data_path
 	}
 
+	router.buildPath = function(path){
+		return buildPath(path)
+	}
+
 	router.buildDataPath = function(path){
-
-		if(!path) path = $window.location.pathname + $window.location.search
-
-		var queryData = {}
-
-		var data_path = router.parsePath(path, queryData, {})
-
-		var query = buildQueryString(queryData)
-		if (query) data_path += "?" + query
-		data_path = data_path.replace(/\/?$/, '/index.json')
-
-		return data_path
+		return buildPath(path, '/index.json')
 	}
 	//=======
 	// function parsePath(path, queryData, hashData) {
