@@ -123,7 +123,9 @@ async function setHooks (component, vnode, hooks) {
       delete vnode.state.__hash
     }
 
-    var attrs = JSON.stringify(vnode.attrs)
+    var attrs = Object.assign({}, vnode.attrs)
+    attrs.query = undefined
+    var attrs = JSON.stringify(attrs)
     var state = JSON.stringify(vnode.state)
     var func = component.fetch.toString()
     var func_hash = func.replace(/\s/g, '').replace(/\w|\d/g, '0')

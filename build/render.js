@@ -44,16 +44,19 @@ module.exports = args => (req, res) => {
 	// Boolean. When set to true commands the renderer to only return the JSON store data
 	var fetch_data_only = false
 
-	if(/\.json$/.test(req.url)){
+	var matches = req_url.match(/^(.*)\/__mp_(.*)\.json(.*)$/)
 
-		req_url = req_url.replace(/\.json$/, '.html')
+	if(matches){
+
+		req_url = matches[1] + '/' + matches[2] + matches[3]
 
 		fetch_data_only = true
 	}
 
-	req_url = req_url.replace(/\/?(index(\.html?)?)?$/, '/index.html')
+	var tokens = req_url.split('?')
+	tokens[0] = tokens[0].replace(/\/$/, '') || '/'
+	req_url = tokens.join('?')
 
-	console.log(req_url)
 
 
 	// Status code variable to set the response status
@@ -93,8 +96,6 @@ module.exports = args => (req, res) => {
 		console.log('No 404 page specified.')
 		component = {component: generateDefaultComponent('Not Found', 404), params:{}}
 	}
-
-
 
 	// function to render component
 	function renderComponent(component, store){

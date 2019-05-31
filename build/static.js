@@ -165,9 +165,29 @@ module.exports = (entry, map, options) => {
 		.sort((a,b) => a.length - b.length)
 		.map(url => {
 			var tokens = url.split('?')
-			tokens[0] = tokens[0].replace(/\/?$/, '/')
-			url = tokens.join('?')
-			return [url.replace(/\/?$/, '/index.html'), url.replace(/\/?$/, '/index.json')]
+			var path = tokens[0]
+			var query = tokens[1]
+			var data_path = path
+			data_path = data_path.replace(/\/$/, '')
+
+			var path_tokens = data_path.split('/')
+
+			var file_name = path_tokens.pop()
+
+			file_name = '__mp_' + file_name + '.json'
+
+			path_tokens.push(file_name)
+
+			data_path = path_tokens.join('/') || '/'
+
+			path = path.replace(/^\/$/, '/index').replace(/\/$/, '').replace(/(\.html?)?$/, '.html')
+
+			if(query){
+				path = path + '?' + query
+				data_path = data_path + '?' + query
+			}
+
+			return [path, data_path]
 		})
 		.reduce((a, b) => a.concat(b), [])
 		.map(url => callback => {

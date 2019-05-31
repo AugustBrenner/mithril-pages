@@ -49,17 +49,30 @@ module.exports = function($window) {
 	}
 
 	function buildPath(path, replacement){
+
 		if(!path) path = $window.location.pathname + $window.location.search
 
 		var queryData = {}
 
 		var data_path = router.parsePath(path, queryData, {})
 
-		data_path = data_path.replace(/\/?$/, '/')
+		data_path = data_path.replace(/\/$/, '')
+
+		var path_tokens = data_path.split('/')
+
+		var file_name = path_tokens.pop()
+
+		if(replacement){
+			file_name = '__mp_' + file_name + replacement
+		}
+
+		path_tokens.push(file_name)
+
+		data_path = path_tokens.join('/') || '/'
 
 		var query = buildQueryString(queryData)
+
 		if (query) data_path += "?" + query
-		data_path = data_path.replace(/\/?(index(\.html?)?)?$/, replacement || '/index.html')
 
 		return data_path
 	}
@@ -69,7 +82,7 @@ module.exports = function($window) {
 	}
 
 	router.buildDataPath = function(path){
-		return buildPath(path, '/index.json')
+		return buildPath(path, '.json')
 	}
 	//=======
 	// function parsePath(path, queryData, hashData) {
@@ -132,8 +145,6 @@ module.exports = function($window) {
 	router.matchRoute = function(path, routes, resolve){
 
 		var params = {query: {}, params: {}, hash: {}, history: {}}
-
-		path = path.replace(/index.html$/, '')
 
 		var pathname = router.parsePath(path, params.query, params.hash)
 

@@ -942,6 +942,7 @@ module.exports = function($window) {
 			var attrs = Object.assign({}, vnode.attrs)
 			attrs.hash = undefined
 			attrs.history = undefined
+			attrs.query = undefined
 			attrs = JSON.stringify(attrs)
 			var state = JSON.stringify(vnode.state)
 		    var func = source.fetch.toString()
@@ -1003,7 +1004,6 @@ module.exports = function($window) {
 		    if(!vnode.store.__pages[cache.path]) vnode.store.__pages[cache.path] = {__components: {}}
 		    if(!vnode.store.__pages[cache.path].__components) vnode.store.__pages[cache.path].__components = {}
 		    vnode.store.__pages[cache.path].__components[key] = cache.expiresAt
-			console.log(vnode.store.__pages)
 
 		}
 		//=======

@@ -160,9 +160,6 @@ module.exports = function($window, redrawService) {
 		})
 	}
 	route.set = function(path, data, options) {
-		var tokens = path.split('?')
-		tokens[0] = tokens[0].replace(/\/?$/, '/')
-		path = tokens.join('?')
 		if (lastUpdate != null) {
 			options = options || {}
 			options.replace = true
@@ -203,6 +200,9 @@ module.exports = function($window, redrawService) {
 
 					var cache_path = routeService.buildPath(path)
 
+					console.log(cache_path, JSON.stringify(storeObject.__pages, null, 2))
+
+
 					var pageObject = storeObject.__pages[cache_path] = storeObject.__pages[cache_path] || {__components:{}}
 
 					var expired = false
@@ -241,9 +241,9 @@ module.exports = function($window, redrawService) {
 
 								storeObject.__components[key] = cache
 
-								if(!storeObject.__page[cache.path]) storeObject.__page[cache.path] = {__components:{}}
+								if(!storeObject.__pages[cache.path]) storeObject.__pages[cache.path] = {__components:{}}
 
-								storeObject.__page[cache.path].__components[key] = cache.expiresAt
+								storeObject.__pages[cache.path].__components[key] = cache.expiresAt
 							})
 						})
 						.catch(console.log)

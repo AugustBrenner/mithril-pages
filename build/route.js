@@ -41,8 +41,6 @@ var Router = function(originalUrl, routes){
 
 		var results = {component: null, params: args}
 
-		pathname = pathname.replace(/index.html$/, '')
-
 		for (var route in routes) {
 			var matcher = new RegExp("^" + route.replace(/:[^\/]+?\.{3}/g, "(.*?)").replace(/:[^\/]+/g, "([^\\/]+)") + "\/?$")
 			if (matcher.test(pathname)) {
@@ -95,21 +93,41 @@ var Router = function(originalUrl, routes){
 
 
 
-Router.buildDataPath = function(path){
+function buildPath(path, replacement){
 
 	if(!path) path = $window.location.pathname + $window.location.search
 
 	var queryData = {}
 
-	var data_path = parsePath(path, queryData, {})
+	var data_path = router.parsePath(path, queryData, {})
 
-	if(data_path ===  '/') data_path += '__index__'
+	data_path = data_path.replace(/\/$/, '')
+
+	var path_tokens = data_path.split('/')
+
+	var file_name = path_tokens.pop()
+
+	if(replacement){
+		file_name = '__mp_' + file_name + replacement
+	}
+
+	path_tokens.push(file_name)
+
+	data_path = path_tokens.join('/') || '/'
 
 	var query = buildQueryString(queryData)
+
 	if (query) data_path += "?" + query
-	data_path += '.json'
 
 	return data_path
+}
+
+Router.buildPath = function(path){
+	return buildPath(path)
+}
+
+Router.buildDataPath = function(path){
+	return buildPath(path, '.json')
 }
 
 
