@@ -48,7 +48,7 @@ module.exports = function(pathname, production){
 		            include: [
           				path.resolve(__dirname, 'bundle-bridge-client.js')
           			],
-					loader: 'string-replace-loader',
+					loader: require.resolve('string-replace-loader'),
 					options: {
 						search: 'PLACEHOLDER_FOR_ENTRY',
 						replace: pathname,
