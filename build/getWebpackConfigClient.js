@@ -24,7 +24,7 @@ module.exports = function(pathname, production){
 			}
 		},
 		resolveLoader: {
-		    modules: [path.resolve(__dirname, '../node_modules')],
+		    modules: [path.resolve(__dirname, '../..'), path.resolve(__dirname, '../node_modules')],
 		},
 		module: {
 			rules: [
@@ -48,7 +48,7 @@ module.exports = function(pathname, production){
 		            include: [
           				path.resolve(__dirname, 'bundle-bridge-client.js')
           			],
-					loader: require.resolve('string-replace-loader'),
+					loader: 'string-replace-loader',
 					options: {
 						search: 'PLACEHOLDER_FOR_ENTRY',
 						replace: pathname,
@@ -56,7 +56,7 @@ module.exports = function(pathname, production){
 		        },
 		        {
 					test: /\.js$/,
-					exclude: /(node_modules|bower_components|client|mithril)/,
+					exclude: [/node_modules/, /bower_components/, path.resolve(__dirname, '../client'), path.resolve(__dirname, '../mithril')],
 					use: [
 						{
 							loader: path.resolve(__dirname, './functionReplaceLoader.js'),
@@ -118,7 +118,7 @@ module.exports = function(pathname, production){
 			rules: [
 		        {
 					test: /\.js$/,
-					exclude: /(node_modules|bower_components|client|mithril)/,
+					exclude: [/node_modules/, /bower_components/, path.resolve(__dirname, '../client'), path.resolve(__dirname, '../mithril')],
 					use: [
 						{
 							loader: 'babel-loader',
@@ -131,7 +131,7 @@ module.exports = function(pathname, production){
 				},
 				{
 					test: /\.(sa|sc|c)ss$/,
-					exclude: /(node_modules|bower_components|client|mithril)/,
+					exclude: [/node_modules/, /bower_components/, path.resolve(__dirname, '../client'), path.resolve(__dirname, '../mithril')],
 					use: [
 						{
 							loader: 'css-loader',
@@ -189,7 +189,7 @@ module.exports = function(pathname, production){
 			rules: [
 		        {
 					test: /\.js$/,
-					exclude: /(node_modules|bower_components|client|mithril)/,
+					exclude: [/node_modules/, /bower_components/, path.resolve(__dirname, '../client'), path.resolve(__dirname, '../mithril')],
 					use: [
 						{
 							loader: 'babel-loader',
@@ -201,7 +201,7 @@ module.exports = function(pathname, production){
 				},
 				{
 					test: /\.(sa|sc|c)ss$/,
-					exclude: /(node_modules|bower_components|client|mithril)/,
+					exclude: [/node_modules/, /bower_components/, path.resolve(__dirname, '../client'), path.resolve(__dirname, '../mithril')],
 					use: [
 						{
 							loader: 'css-loader',
