@@ -7,6 +7,7 @@ var Promise = require("../../mithril/promise/promise")
 var coreRouter = require("../router/router")
 var request = require("../../mithril/request.js").request
 var buildQueryString = require("../../mithril/querystring/build")
+var lazy = require("../lazy/lazy.js")
 //=======
 // var Promise = require("../promise/promise")
 // var coreRouter = require("../router/router")
@@ -183,7 +184,7 @@ module.exports = function($window, redrawService) {
 
 					if(!component.resolved){
 
-						var should_load = (component.options.load || m.lazy.config.load) === 'ref'
+						var should_load = (component.options.load || lazy.config.load) === 'ref'
 
 						if(options.preload === true || options.preload === false) should_load = options.preload
 
