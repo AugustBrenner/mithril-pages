@@ -106,7 +106,6 @@ module.exports = args => (req, res) => {
 				store: store,
 				path: req_url,
 				data_only: fetch_data_only,
-				strict: true
 			}
 		)
 		.then(response => {
