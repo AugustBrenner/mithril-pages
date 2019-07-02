@@ -38,7 +38,7 @@ module.exports = function(pathname, production){
 								name: '[name].[ext]',
 								outputPath: (url, resourcePath, context) => {
 
-									return resourcePath
+									return resourcePath.replace(/^\//, '')
 								},
 							},
 						},

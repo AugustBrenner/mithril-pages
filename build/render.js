@@ -3,6 +3,7 @@
 const fs 						= require('fs')
 const m 						= require('./server')
 const route 					= require("./route")
+const querystring 				= require('querystring')
 const componentToHtml 			= require('./componentToHtml.js')
 
 
@@ -76,9 +77,11 @@ module.exports = args => (req, res) => {
 	// If no component is returned by the router check if a static file resource should be returned
 	if(!component && !fetch_data_only){
 		try{
-	    	var stat = fs.statSync(req_url)
+	    	const static_url = querystring.unescape(req_url)
 
-		    if(stat) return res.sendFile(req_url)
+	    	const stat = fs.statSync(static_url)
+
+		    if(stat) return res.sendFile(static_url)
 		}
 		catch(e){}
 
