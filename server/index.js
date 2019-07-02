@@ -49,7 +49,7 @@ function Stylesheet(styleObject){
 
 	var self = this
 
-	var map = styleObject.locals
+	var map = styleObject.locals || {}
 
 	Object.keys(map).forEach(function(key){
 		self[key] = map[key]

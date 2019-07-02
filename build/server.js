@@ -178,8 +178,6 @@ module.exports = (entry, options) => new Promise((resolve, reject) => {
 				return source.replace('webpack://app', path.dirname(entry), '..')
 			})
 
-			args.routes = requireFromString(code, entry)
-
 			SourceMapSupport.install({
 				retrieveSourceMap: function(source) {
 					if (source === entry) {
@@ -191,6 +189,9 @@ module.exports = (entry, options) => new Promise((resolve, reject) => {
 					return null
 				}
 			})
+			
+			args.routes = requireFromString(code, entry)
+
 			args.sourcemap = sourcemap
 			args.filename = entry
 
