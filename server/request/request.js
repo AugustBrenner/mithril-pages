@@ -89,6 +89,7 @@ module.exports = function(Promise) {
 		if (useBody) {
 			//<<<<<<< Modified: Removed $window references
 			if (typeof args.serialize === "function") data = args.serialize(data)
+			else data = JSON.stringify(data)
 			//=======
 			// else if (!(data instanceof $window.FormData)) data = JSON.stringify(data)
 			//>>>>>>>
