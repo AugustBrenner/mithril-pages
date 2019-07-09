@@ -1,6 +1,6 @@
 {
   "name": "mithril-pages",
-  "version": "0.3.8",
+  "version": "0.3.9",
   "description": "Universal javascript framework based on mithril.js",
   "main": "index.js",
   "scripts": {

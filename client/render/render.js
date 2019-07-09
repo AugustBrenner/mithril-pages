@@ -208,6 +208,7 @@ module.exports = function($window) {
 		// console.log('createComponent', vnode)
 		initComponent(vnode, hooks)
 		if (vnode.instance != null) {
+			vnode.instance.store = vnode.store
 			createNode(parent, vnode.instance, hooks, ns, nextSibling)
 			vnode.dom = vnode.instance.dom
 			vnode.domSize = vnode.dom != null ? vnode.instance.domSize : 0
