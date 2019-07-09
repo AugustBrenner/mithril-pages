@@ -201,9 +201,6 @@ module.exports = function($window, redrawService) {
 
 					var cache_path = routeService.buildPath(path)
 
-					console.log(cache_path, JSON.stringify(storeObject.__pages, null, 2))
-
-
 					var pageObject = storeObject.__pages[cache_path] = storeObject.__pages[cache_path] || {__components:{}}
 
 					var expired = false
