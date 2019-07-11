@@ -67,7 +67,7 @@ Stylesheet.prototype.render = function(){
 				return null
 			}
 			vnode.page.__styles[self.__path] = true
-			return m('style', {type:"text/css", key: self.__path}, self.__ruleset)
+			return m('style', {type:"text/css", key: self.__path}, m.trust(self.__ruleset))
 		}
 	})
 }
