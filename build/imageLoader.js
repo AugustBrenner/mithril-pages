@@ -35,6 +35,10 @@ function encodeSvgDataUri(svg) {
   return "data:image/svg+xml," + uriPayload;
 }
 
+
+
+var previewCache = {}
+
 module.exports = function(contentBuffer) {
   if (this.cacheable) {
     this.cacheable(true);
@@ -63,19 +67,34 @@ module.exports = function(contentBuffer) {
     src = content.match(/^module.exports = (.*);/)[1];
   }
 
-  var numberOfPrimitives = "numberOfPrimitives" in options ? parseInt(options.numberOfPrimitives, 10) : 20;
-  var mode = "mode" in options ? parseInt(options.mode, 10) : 0;
-  var blur = "blur" in options ? parseInt(options.blur, 10) : 12;
-  var sqipResult = sqip({
-    filename: filePath,
-    numberOfPrimitives: numberOfPrimitives,
-    mode: mode,
-    blur: blur
-  });
-  var encodedSvgDataUri = encodeSvgDataUri(sqipResult.final_svg);
-  var dimensions = sqipResult.img_dimensions
+  var hash = src.match(/\"(.*)\.jpg\"/)[1];
 
-  return 'module.exports = { "toString": function(){return "' + filePath + '"}, "src": "' + filePath + '" , "preview": "' + encodedSvgDataUri + '", "height": ' + dimensions.height + ', "width": ' + dimensions.width + ' };';
+  if(previewCache[hash]){
+    var exportString = previewCache[hash]
+  }
+  else {
+    var numberOfPrimitives = "numberOfPrimitives" in options ? parseInt(options.numberOfPrimitives, 10) : 20;
+    var mode = "mode" in options ? parseInt(options.mode, 10) : 0;
+    var blur = "blur" in options ? parseInt(options.blur, 10) : 12;
+    var sqipResult = sqip({
+      filename: filePath,
+      numberOfPrimitives: numberOfPrimitives,
+      mode: mode,
+      blur: blur
+    });
+    var encodedSvgDataUri = encodeSvgDataUri(sqipResult.final_svg);
+    var dimensions = sqipResult.img_dimensions
+
+    if(previewCache[hash]){
+      var exportString = previewCache[hash]
+    }
+    else{
+      var exportString = previewCache[hash] = 'module.exports = { "toString": function(){return "' + filePath + '"}, "src": "' + filePath + '" , "preview": "' + encodedSvgDataUri + '", "height": ' + dimensions.height + ', "width": ' + dimensions.width + ' };';
+    }
+  }
+
+
+  return exportString
 };
 
 module.exports.raw = true;
