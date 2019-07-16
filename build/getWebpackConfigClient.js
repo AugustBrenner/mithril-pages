@@ -29,7 +29,7 @@ module.exports = function(pathname, production){
 		module: {
 			rules: [
 				{
-					test: /\.(png|jpe?g|gif|woff(2)?|ttf|eot|svg)$/,
+					test: /\.(woff(2)?|ttf|eot|svg)$/,
 					use: [
 						{
 							loader: 'file-loader',
@@ -41,6 +41,17 @@ module.exports = function(pathname, production){
 									return resourcePath.replace(/^\//, '')
 								},
 							},
+						},
+					],
+				},
+				{
+					test: /\.(png|jpe?g|gif|tif?f)$/,
+					use: [
+						{
+							loader: path.resolve(__dirname, './imageLoader.js'),
+							options: {
+								emitFile: false,
+							}
 						},
 					],
 				},

@@ -1,9 +1,12 @@
 'use strict'
 
 const fs 						= require('fs')
+const path 						= require('path')
+const url 						= require('url')
+const querystring 				= require('querystring')
+const sharp 					= require('sharp')
 const m 						= require('./server')
 const route 					= require("./route")
-const querystring 				= require('querystring')
 const componentToHtml 			= require('./componentToHtml.js')
 
 
@@ -77,13 +80,128 @@ module.exports = args => (req, res) => {
 	// If no component is returned by the router check if a static file resource should be returned
 	if(!component && !fetch_data_only){
 		try{
-	    	const static_url = querystring.unescape(req_url)
 
-	    	const stat = fs.statSync(static_url)
+	    	const request_data = url.parse(req_url, true)
+	    	const path_data = path.parse(querystring.unescape(request_data.pathname))
 
-		    if(stat) return res.sendFile(static_url)
+	    	console.log(req_url, JSON.stringify(request_data, null, 4), JSON.stringify(path_data, null, 4))
+
+	    	if(/^\.(png|jpe?g|gif|webp|tif?f)$/.test(path_data.ext)){
+
+	    		let static_url = querystring.unescape(request_data.pathname)
+
+	    		new Promise((resolve, reject) => {
+
+		    		if(request_data.query.original_ext){
+		    			console.log('HEEEEYY')
+		    			resolve(static_url.replace(new RegExp(path_data.ext + '$'), '.' + request_data.query.original_ext))
+		    		}
+		    		else {
+		    			const filename_test = new RegExp('^' + path_data.name + '\\.*.')
+		    			fs.readdir(path_data.dir, (err, files) => {
+							let original_file
+							for(let i = 0; i < files.length; i++){
+								if(files[i] === path_data.base){
+									original_file = files[i]
+									console.log('HIIII')
+									break
+								}
+								else if(filename_test.test(files[i])){
+									original_file = files[i]
+									console.log('HELLLLLO')
+								}
+							}
+
+							if(!original_file) reject()
+
+							resolve(path.resolve(path_data.dir, original_file))
+						})
+		    		}
+	    		})
+
+	    		.then(static_url => {
+
+	    			console.log(static_url)
+
+	    			if(path_data.ext === '.gif'){
+	    				if(/\.gif$/.test(static_url)){
+	    					if(request_data.query.height || request_data.query.width){
+	    						return res.status(500).error({message: 'Image resizer cannot resize .gif images'})
+	    					}
+	    					return res.sendFile(static_url)
+	    				}
+	    				else return res.status(500).error({message: 'Image reformatter cannot export to .gif'})
+	    			}
+
+	    			const types = {
+	    				'.jpg': 'jpeg',
+	    				'.jpeg': 'jpeg',
+	    				'.webp': 'webp',
+	    				'.png': 'png',
+	    				'.tiff': 'tiff',
+	    				'.tif': 'tiff',
+	    			}
+
+	    			const type = types[path_data.ext]
+
+
+	    			let transformer = sharp()
+
+					let height, width, quality
+
+					if(!isNaN(request_data.query.height)) height = parseInt(request_data.query.height, 10)
+					if(!isNaN(request_data.query.width)) width = parseInt(request_data.query.width, 10)
+					if(!isNaN(request_data.query.quality)) quality = parseInt(request_data.query.quality, 10)
+
+					if(height || width){
+						
+						transformer = transformer.resize({
+							width:width,
+							height:height,
+							fit: sharp.fit.cover,
+    						position: sharp.strategy.entropy,
+							withoutEnlargement: true,
+						})
+					}
+
+					transformer = transformer
+					.toFormat(type)
+					[type]({
+						quality:quality,
+					})
+
+					transformer = transformer
+					.on('error', function(err) {
+						console.error(err)
+						res.error(err)
+					})
+
+	    			res.setHeader('Content-Type', 'image/' + type)
+	    			
+	    			fs.createReadStream(static_url)
+
+	    			.pipe(transformer)
+
+	    			.pipe(res)
+
+	    		})
+	    		.catch(error => {
+	    			console.error(error)
+	    			res.status(500).error({message: 'Error reformatting or resizing image', error: error})
+	    		})
+	    	}
+	    	else{
+	    		
+	    		const static_url = querystring.unescape(request_data.pathname)
+	    		
+	    		const stat = fs.statSync(static_url)
+
+		    	if(stat) return res.sendFile(static_url)
+	    	}
 		}
-		catch(e){}
+		catch(e){console.log(e)}
+
+		return
 
 	}
 
