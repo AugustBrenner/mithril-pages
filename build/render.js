@@ -149,19 +149,27 @@ module.exports = args => (req, res) => {
 
 					let height, width, quality
 
+					let valid_positions = ['attention', 'entropy']
+
 					if(!isNaN(request_data.query.height)) height = parseInt(request_data.query.height, 10)
 					if(!isNaN(request_data.query.width)) width = parseInt(request_data.query.width, 10)
 					if(!isNaN(request_data.query.quality)) quality = parseInt(request_data.query.quality, 10)
 
 					if(height || width){
-						
-						transformer = transformer.resize({
+
+						const options = {
 							width:width,
 							height:height,
 							fit: sharp.fit.cover,
-    						position: sharp.strategy.entropy,
 							withoutEnlargement: true,
-						})
+						}
+
+						if(req.query.position && valid_positions.indexOf(req.query.position) > -1){
+
+							options.position = sharp.strategy[req.query.position]
+						}
+						
+						transformer = transformer.resize(options)
 					}
 
 					transformer = transformer
@@ -179,6 +187,8 @@ module.exports = args => (req, res) => {
 	    			res.setHeader('Content-Type', 'image/' + type)
 	    			
 	    			fs.createReadStream(static_url)
+
+	    			.on('error', console.error)
 
 	    			.pipe(transformer)
 
