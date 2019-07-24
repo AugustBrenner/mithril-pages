@@ -5,8 +5,10 @@ const path 						= require('path')
 const url 						= require('url')
 const querystring 				= require('querystring')
 const sharp 					= require('sharp')
+const sqip 						= require('sqip')
+const request 					= require('request')
 const m 						= require('./server')
-const route 					= require("./route")
+const route 					= require('./route')
 const componentToHtml 			= require('./componentToHtml.js')
 
 
@@ -84,31 +86,120 @@ module.exports = args => (req, res) => {
 	    	const request_data = url.parse(req_url, true)
 	    	const path_data = path.parse(querystring.unescape(request_data.pathname))
 
-	    	console.log(req_url, JSON.stringify(request_data, null, 4), JSON.stringify(path_data, null, 4))
+	    	// console.log(req_url, JSON.stringify(request_data, null, 4), JSON.stringify(path_data, null, 4))
 
-	    	if(/^\.(png|jpe?g|gif|webp|tif?f)$/.test(path_data.ext)){
+	    	if(req.query.src){
+
+	    		const src_request_data = url.parse(req.query.src, true)
+	    		const src_path_data = path.parse(querystring.unescape(src_request_data.pathname))
+
+	    		// console.log("EEEEEELLLOEOEOEOEOE", req.query.src)
+	    		// console.log(src_request_data)
+	    		// console.log(src_path_data)
+
+    			if(src_path_data.ext === '.gif'){
+    				if(/\.gif$/.test(static_url)){
+    					if(request_data.query.height || request_data.query.width){
+    						return res.status(400).send({message: 'Image resizer cannot resize .gif images'})
+    					}
+    					return res.sendFile(req.query.src)
+    				}
+    				else return res.status(400).send({message: 'Image reformatter cannot export to .gif'})
+    			}
+
+    			const types = {
+    				'.jpg': 'jpeg',
+    				'.jpeg': 'jpeg',
+    				'.webp': 'webp',
+    				'.png': 'png',
+    				'.tiff': 'tiff',
+    				'.tif': 'tiff',
+    			}
+
+    			const type = types[path_data.ext]
+
+
+    			let transformer = sharp()
+
+				let height, width, quality
+
+				let valid_positions = ['attention', 'entropy']
+
+				if(!isNaN(request_data.query.height)) height = parseInt(request_data.query.height, 10)
+				if(!isNaN(request_data.query.width)) width = parseInt(request_data.query.width, 10)
+				if(!isNaN(request_data.query.quality)) quality = parseInt(request_data.query.quality, 10)
+
+				if(height || width){
+
+					const options = {
+						width:width,
+						height:height,
+						fit: sharp.fit.cover,
+						withoutEnlargement: true,
+					}
+
+					if(req.query.position && valid_positions.indexOf(req.query.position) > -1){
+
+						options.position = sharp.strategy[req.query.position]
+					}
+					
+					transformer = transformer.resize(options)
+				}
+
+				transformer = transformer
+				.toFormat(type)
+				[type]({
+					quality:quality,
+				})
+
+				transformer = transformer
+				.on('error', function(err) {
+					console.error(err)
+					res.error(err)
+				})
+
+    			res.setHeader('Content-Type', 'image/' + type)
+
+    			const headers = Object.assign({},req.headers)
+    			delete headers.host
+    			delete headers.accept
+    			
+    			request(req.query.src, {
+    				headers: headers
+    			})
+
+    			.on('error', console.error)
+
+    			.pipe(transformer)
+
+    			.pipe(res)
+
+	    	}
+
+	    	else if(/^\.(png|jpe?g|gif|webp|tif?f)$/.test(path_data.ext)){
 
 	    		let static_url = querystring.unescape(request_data.pathname)
 
 	    		new Promise((resolve, reject) => {
 
 		    		if(request_data.query.original_ext){
-		    			console.log('HEEEEYY')
+		    			// console.log('HEEEEYY')
 		    			resolve(static_url.replace(new RegExp(path_data.ext + '$'), '.' + request_data.query.original_ext))
 		    		}
 		    		else {
 		    			const filename_test = new RegExp('^' + path_data.name + '\\.*.')
 		    			fs.readdir(path_data.dir, (err, files) => {
+		    				if(err) return reject(err)
 							let original_file
 							for(let i = 0; i < files.length; i++){
 								if(files[i] === path_data.base){
 									original_file = files[i]
-									console.log('HIIII')
+									// console.log('HIIII')
 									break
 								}
 								else if(filename_test.test(files[i])){
 									original_file = files[i]
-									console.log('HELLLLLO')
+									// console.log('HELLLLLO')
 								}
 							}
 
@@ -121,7 +212,7 @@ module.exports = args => (req, res) => {
 
 	    		.then(static_url => {
 
-	    			console.log(static_url)
+	    			// console.log(static_url)
 
 	    			if(path_data.ext === '.gif'){
 	    				if(/\.gif$/.test(static_url)){
