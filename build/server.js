@@ -153,7 +153,15 @@ module.exports = (entry, options) => new Promise((resolve, reject) => {
 
 			// console.log(JSON.stringify(stats.toJson(), null, 2))
 
-			if(stats.toJson().errors.length > 0) return
+			if(error){
+				console.error(error)
+				return reject(error)
+			}
+
+			if(stats.hasErrors() || stats.toJson().errors.length > 0){
+				console.error(stats.toJson().errors)
+				return reject(stats.toJson().errors)
+			}
 
 
 			const assetsByChunkName = stats.toJson().assetsByChunkName
