@@ -132,6 +132,8 @@ module.exports = function($window) {
 		var hash = buildQueryString(hashData)
 		if (hash) path += "#" + hash
 
+		if(!path) path = $window.location.pathname
+
 		if (supportsPushState) {
 			var state = options ? options.state : null
 			var title = options ? options.title : null
