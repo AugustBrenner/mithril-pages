@@ -39,7 +39,7 @@ function generateDefaultComponent(message, status){
 
 
 // Render function responds to requests
-module.exports = args => (req, res, params) => {
+module.exports = args => (req, res) => {
 
 	console.time('Time')
 
@@ -70,7 +70,7 @@ module.exports = args => (req, res, params) => {
 
 
 	// Default Store Object to get passed into the router
-	let store = {__pages:{}, __components:{}, params: params || {}}
+	let store = {__pages:{}, __components:{}}
 
 	store.__pages[req_url] = {}
 
