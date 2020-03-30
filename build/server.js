@@ -58,9 +58,9 @@ module.exports = (entry, options) => new Promise((resolve, reject) => {
 
 	options = options || {}
 
-	options.env = object.assign({}, options.env || {})
-	const env_client = object.assign({}, options.env || {}, options.env_client || {})
-	const env_server = object.assign({}, options.env || {}, options.env_server || {})
+	options.env = Object.assign({}, options.env || {})
+	const env_client = Object.assign({}, options.env || {}, options.env_client || {})
+	const env_server = Object.assign({}, options.env || {}, options.env_server || {})
 
 
 	// Server config
