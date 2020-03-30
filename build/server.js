@@ -60,7 +60,7 @@ module.exports = (entry, options) => new Promise((resolve, reject) => {
 
 
 	// Server config
-	const server_config = getWebpackConfigServer(entry, options.production)
+	const server_config = getWebpackConfigServer(entry, options.production, options.env || {})
 
 	const compiler_server = webpack(server_config)
 
@@ -71,7 +71,7 @@ module.exports = (entry, options) => new Promise((resolve, reject) => {
 
 
 	// Client config
-	const client_config = getWebpackConfigClient(entry, options.production)
+	const client_config = getWebpackConfigClient(entry, options.production, options.env || {})
 
 	// console.log(JSON.stringify(client_config, null, 2))
 

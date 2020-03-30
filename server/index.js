@@ -43,6 +43,13 @@ Object.defineProperty(m, "target", {
     value: "server",
     writable: false
 })
+	
+try{
+	m.env = PLACEHOLDER_FOR_ENVIRONMENT_VARIABLES
+}
+catch(e){
+	m.env = {error: {message:'Error parsing environment variables.', error: e}}
+}
 
 
 function Stylesheet(styleObject){

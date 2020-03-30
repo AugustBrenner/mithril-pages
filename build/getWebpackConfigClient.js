@@ -5,7 +5,7 @@ const merge = require('webpack-merge')
 const HardSourceWebpackPlugin = require('hard-source-webpack-plugin')
 const FriendlyErrorsWebpackPlugin = require('friendly-errors-webpack-plugin')
 
-module.exports = function(pathname, production){
+module.exports = function(pathname, production, environment_variables){
 
 	var common = {
 		entry: [
@@ -63,6 +63,16 @@ module.exports = function(pathname, production){
 					options: {
 						search: 'PLACEHOLDER_FOR_ENTRY',
 						replace: pathname,
+					}
+		        },
+		        { 
+		            include: [
+          				path.resolve(__dirname, '../client/index.js')
+          			],
+					loader: 'string-replace-loader',
+					options: {
+						search: 'PLACEHOLDER_FOR_ENVIRONMENT_VARIABLES',
+						replace: JSON.stringify(environment_variables || {}),
 					}
 		        },
 		        {

@@ -47,6 +47,8 @@ Object.defineProperty(m, "target", {
     writable: false
 })
 
+m.env = PLACEHOLDER_FOR_ENVIRONMENT_VARIABLES
+
 
 function Stylesheet(styleObject){
 

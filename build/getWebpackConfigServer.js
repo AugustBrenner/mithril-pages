@@ -7,7 +7,7 @@ const HardSourceWebpackPlugin = require('hard-source-webpack-plugin')
 const FriendlyErrorsWebpackPlugin = require('friendly-errors-webpack-plugin')
 
 
-module.exports = function(pathname, production){
+module.exports = function(pathname, production, environment_variables){
 
 	var common = {
 		entry: pathname,
@@ -63,6 +63,16 @@ module.exports = function(pathname, production){
 						},
 					],
 				},
+				{ 
+		            include: [
+          				path.resolve(__dirname, '../server/index.js')
+          			],
+					loader: 'string-replace-loader',
+					options: {
+						search: 'PLACEHOLDER_FOR_ENVIRONMENT_VARIABLES',
+						replace: JSON.stringify(environment_variables || {}),
+					}
+		        },
 		        {
 					test: /\.js$/,
 					exclude: /(node_modules|bower_components)/,
